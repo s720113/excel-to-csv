@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0729v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0729v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0729v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0729v2</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
-        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語（含外觀/效期/退冰/細骨/海鮮等）、📢大聲公與⚠️圖示！</b><br>
+        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢生鮮水果購買須知與⚠️圖示！</b><br>
         3. <b>[標題單位優先] 優先讀取「商品: ...-組」與團購價金額單位，不再被頂端「42元/瓶」警語干擾！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -294,6 +294,16 @@
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/溫馨提醒[:：]?.*/g, "");
 
+                    // 💡 大聲公與購買須知清理 (含生鮮水果農產品須知)
+                    cleanBodyText = cleanBodyText.replace(/📢\s*購買須知.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/生鮮水果屬天然農產品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/生鮮食品不適用七日鑑賞期.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/天然果皮紋路[、，]?小瑕疵屬正常生長現象.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/天然外觀差異[、，]?口感[、，]?甜度等因素恕不列入退換貨範圍.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/若收到商品有嚴重碰傷或腐敗.*/g, "");
+
                     // 💡 星星警語（全方位清理）
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[、，]?包裝略有差異.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*效期[、，]?口感與色澤.*/g, "");
@@ -352,10 +362,6 @@
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*餅乾、糕餅、酥脆類.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/若不影響商品本身品質及食用安全，恕不列入退換貨範圍.*/g, "");
 
-                    cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/生鮮食品不適用七日鑑賞期.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/天然外觀差異、口感、甜度等因素恕不列入退換貨範圍.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/商品請全程冷凍並依外包裝標示妥善保存.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/因取貨逾時、保存不當或自行退冰所造成之品質變化.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/調理食品請依包裝標示方式充分加熱後食用.*/g, "");
