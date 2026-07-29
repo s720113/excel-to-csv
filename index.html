@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel 轉 CSV 智慧排版工具 0728v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --bg-color: #f1f8e9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #a5d6a7;
+        }
+        * { box-sizing: border-box; font-family: "Microsoft JhengHei", -apple-system, sans-serif; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 650px;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 22px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .upload-card {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .upload-card:hover {
+            border-color: var(--primary-color);
+            background: #f1f8e9;
+        }
+        .upload-card.dragover {
+            border-color: var(--primary-hover) !important;
+            background: #c8e6c9 !important;
+        }
+        .upload-card input[type="file"] { display: none; }
+        .upload-icon { font-size: 50px; margin-bottom: 15px; display: block; user-select: none; }
+        .upload-card h3 { margin: 0 0 8px 0; font-size: 18px; color: var(--primary-color); }
+        .upload-card p { margin: 0; font-size: 13px; color: #666; }
+        .file-info {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--primary-color);
+            font-weight: bold;
+            word-break: break-all;
+        }
+        .log-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            display: none;
+        }
+        .log-title { font-size: 16px; font-weight: bold; color: #d32f2f; margin-bottom: 10px; }
+        textarea {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #ffcdd2;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0728v2</h1>
+    <div class="subtitle">
+        1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
+        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢大聲公與⚠️圖示！</b><br>
+        3. <b>[標題單位優先] 優先讀取「商品：...-組」與團購價金額單位，不再被頂端「42元/瓶」警語干擾！</b><br>
+        4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
+    </div>
+
+    <div class="upload-card" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <span class="upload-icon">📊</span>
+        <h3>把 Excel 檔案拖到這裡 或 點擊此處上傳</h3>
+        <p>支援 .xlsx 格式的 Excel 檔案</p>
+        <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none;">
+        <div class="file-info" id="file-name">尚未選擇檔案</div>
+    </div>
+
+    <div class="log-section" id="log-section">
+        <div class="log-title">⚠️ 偵測到排版異常或漏字，請至產出的 CSV 檔案確認修正：</div>
+        <textarea id="log-text" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    const FOOTER_A = "\n\n⸻\n\n‼️下單請+數量\n✅範例：+1、+2、+3\n\n🔺結單時間：公佈結單日、結單當天上午08:00關閉留言後，就無法追加訂單或取消訂單。\n⚠️「若要取消商品」請在結單前、在此商品貼文下「留言處」打上「取消訂單」。\n⚠️切記❗️請勿自行刪留言及編輯留言、系統不會自動更改訂單，你的訂單還是存在💁🏻\n🍒商品若只是外觀小瑕疵、運送過程有凹盒，不影響功能無法退換貨哦。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n💢棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠️預購商品需等待，急用或無法等待者勿下單哦😃\n♻️響應環保，請自備環保購物袋🛍️";
+
+    const FOOTER_B = "\n\n⸻\n\n‼️訂購方式：英文代碼+數量\n✅範例：A+1、B+1、C+1\n\n🔺結單時間：公佈結單日、結單當天上午08:00關閉留言後，就無法追加訂單或取消訂單。\n⚠️「若要取消商品」請在結單前、在此商品貼文下「留言處」打上「取消訂單」。\n⚠️切記❗️請勿自行刪留言及編輯留言、系統不會自動更改訂單，你的訂單還是存在💁🏻\n🍒商品若只是外觀小瑕疵、運送過程有凹盒，不影響功能無法退換貨哦。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n💢棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠️預購商品需等待，急用或無法等待者勿下單哦😃\n♻️響應環保，請自備環保購物袋🛍️";
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileName = document.getElementById('file-name');
+    const logSection = document.getElementById('log-section');
+    const logText = document.getElementById('log-text');
+
+    fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    // 💡 升級版精準單位抓取：優先抓取標題行「商品: ...-組-」與價格「一組$55」，避開開頭「42元/瓶」標語
+    function extractStyleUnit(text) {
+        // 1. 優先從「商品: ...」標題提取單位 (如 -組-、-包-、-瓶-)
+        let mProd = text.match(/商品[:：]\s*([^\n]+)/);
+        if (mProd) {
+            let prodText = mProd[1];
+            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個])[-－—]/);
+            if (mDash) return "一" + mDash[1];
+
+            let prodClean = prodText.replace(/\(.*?\)|（.*?）/g, '').trim();
+            if (prodClean) {
+                let lastChar = prodClean.slice(-1);
+                if ("組包罐瓶盒支袋個".includes(lastChar)) {
+                    return "一" + lastChar;
+                }
+            }
+        }
+
+        // 2. 從售價/團購價提取 (如「一組$55元」、「一組55」)
+        let cleanText = text.replace(/\s+/g, ' ');
+        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個]|單[組包罐瓶盒支袋個])[\$💰]?\s*\d+/);
+        if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
+
+        // 3. 檢查【規格】欄位 (如 3入／組、5入/包)
+        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個])/);
+        if (mSpec) return "一" + mSpec[1];
+
+        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個])/);
+        if (mSlash) return "一" + mSlash[1];
+
+        // 4. 最後搜尋內文「一組、一包、一罐...」
+        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|單包|單瓶|單罐|單組|一個)(?![多吃用途用方案好])/);
+        if (mBody) return mBody[1].replace("單", "一");
+
+        return "一組";
+    }
+
+    function extractABCOptions(text) {
+        const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
+        if (styleLineMatch && styleLineMatch[1].trim()) {
+            let val = styleLineMatch[1].trim();
+            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包")) {
+                return val;
+            }
+        }
+
+        const options = [];
+        const seenLetters = new Set();
+        const fullToHalfLetter = {
+            'Ａ':'A','Ｂ':'B','Ｃ':'C','Ｄ':'D','Ｅ':'E','Ｆ':'F','Ｍ':'M','Ｎ':'N','Ｏ':'O','Ｐ':'P','Ｑ':'Q','Ｒ':'R','Ｓ':'S','Ｔ':'T',
+            'Ｕ':'U','Ｖ':'V','Ｗ':'W','Ｘ':'X','Ｙ':'Y','Ｚ':'Z'
+        };
+
+        const lines = text.split("\n");
+        for (let line of lines) {
+            let trimmed = line.trim();
+
+            if (trimmed.includes("【型號】") || trimmed.includes("【規格】") || trimmed.includes("【材質】")) continue;
+
+            const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:][\s]*([^\$\d\n,，#＃\-－]+)/g;
+            let match;
+            while ((match = abcLineRegex.exec(trimmed)) !== null) {
+                let rawLetter = match[1].toUpperCase();
+                let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
+                let optionName = match[2].split("💰")[0].split("$")[0].trim();
+
+                if (optionName && !optionName.startsWith("#") && !optionName.startsWith("＃") && !seenLetters.has(cleanLetter)) {
+                    seenLetters.add(cleanLetter);
+                    options.push(cleanLetter + "-" + optionName);
+                }
+            }
+        }
+
+        return options.join(",");
+    }
+
+    function handleFile(file) {
+        fileName.textContent = "✅ 已讀取: " + file.name + " - 處理中...";
+        logSection.style.display = 'none';
+        logText.value = '';
+
+        if (typeof XLSX === 'undefined') {
+            alert("❌ 錯誤：無法載入 Excel 解析套件！");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                const errorLog = [];
+                const txtOutputLines = [];
+
+                if (!jsonRows || jsonRows.length === 0) {
+                    alert("❌ 錯誤：這個 Excel 檔案內沒有資料！");
+                    return;
+                }
+
+                if (!Object.keys(jsonRows[0]).includes("貼文")) {
+                    alert("❌ 錯誤：這張 Excel 中找不到名為「貼文」的欄位標題！");
+                    return;
+                }
+
+                const processedRows = jsonRows.map((row, idx) => {
+                    let postText = row["貼文"] ? String(row["貼文"]) : "";
+                    const postNum = idx + 1; 
+                    const rowNum = idx + 2;  
+
+                    if (!postText.trim()) return row;
+
+                    const styleUnit = extractStyleUnit(postText); 
+                    const abcOptionsList = extractABCOptions(postText); 
+
+                    let originalPriceStr = ""; 
+                    let targetPriceClean = "";
+                    const priceTagMatch = postText.match(/價格[:：]\s*([^\n]+)/); 
+                    if (priceTagMatch) {
+                        originalPriceStr = priceTagMatch[1].trim();
+                        targetPriceClean = originalPriceStr.replace(/,/g, "").replace(/\s+/g, ""); 
+                    }
+
+                    if (targetPriceClean) {
+                        const textWithoutTag = postText.replace(priceTagMatch[0], "");
+                        const compressedText = textWithoutTag.replace(/\s+/g, "").replace(/,/g, "");
+                        
+                        let allMatched = true;
+                        const individualPrices = originalPriceStr.split(/[,，\s]+/);
+                        for (let pr of individualPrices) {
+                            let singlePriceClean = pr.replace(/\D/g, "");
+                            if (singlePriceClean && !compressedText.includes(singlePriceClean)) {
+                                allMatched = false;
+                            }
+                        }
+                        
+                        if (!allMatched) {
+                            errorLog.push("❌ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：尾端標籤價格 [" + originalPriceStr + "] 未在前段介紹中完全找到相符金額");
+                        }
+                    }
+
+                    let cleanBodyText = postText;
+
+                    cleanBodyText = cleanBodyText.replace(/🚚\s*預計到貨日.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/溫馨提醒[:：]?.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請全程冷凍保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食用前請充分加熱.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*配料比例略有不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*取貨請先檢查.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*到貨時間可能因氣候.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品採接單後安排生產.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*影片圖片僅供使用參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*圖片文案一樣不代表品質.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品如有瑕疵請於規定期限.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/外盒凹損或外觀輕微瑕疵.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*服飾、鞋類商品請確認尺寸.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/手工測量誤差.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品因拍攝光線、螢幕顯示.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/顏色、外觀、包裝或細節.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品圖片僅供參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/請以實際到貨商品為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品請依包裝標示方式妥善保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因離開冷藏環境過久.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*過敏原資訊.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*取貨時請立即確認商品及包裝狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/如有破損、退冰、變質.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/逾期、商品已烹調食用或無法提供佐證者.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*食品屬消耗性商品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/恕不因個人口味、口感、外觀、包裝.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品尺寸、顏色及外觀可能因人工測量.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品一經使用、組裝、清洗.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因個人使用、保管不當造成之損壞.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*運送過程中，外盒、包裝或瓶身如有輕微擠壓.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/不影響商品本身功能及品質者，不列入瑕疵.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品實際使用效果、穿著感受或適用性.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/不以個人主觀感受作為退換貨依據.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/不適合對相關成分過敏者食用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品有效期限、外觀、口感、色澤及風味.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/屬正常現象，請依外包裝標示為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*餅乾、糕餅、酥脆類.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/若不影響商品本身品質及食用安全，恕不列入退換貨範圍.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/生鮮食品不適用七日鑑賞期.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/天然外觀差異、口感、甜度等因素恕不列入退換貨範圍.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/商品請全程冷凍並依外包裝標示妥善保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因取貨逾時、保存不當或自行退冰所造成之品質變化.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/調理食品請依包裝標示方式充分加熱後食用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/可能影響商品外觀、口感及熟度，請依實際情況調整.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*固形物包含主食材.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*海鮮可能因季節.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冰品請全程冷凍保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冰品於配送過程中.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冷凍商品退冰後可能因冰晶融化.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*優酪乳、優格、果汁及其他冷藏飲品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/🌱\s*運送過程中如有少量落葉.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/☀️\s*植物到貨後請立即依植物特性.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/📸\s*如收到商品有嚴重折損.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/購買須知.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/價格[:：].*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/款式名稱[:：].*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/款式[:：].*/g, "");
+
+                    const lines = cleanBodyText.split("\n");
+                    const cleanedLines = [];
+                    for (let i = 0; i < lines.length; i++) {
+                        const stripped = lines[i].trim();
+                        if (!stripped || ['⚠️', '—', '-', '📢', '📌', '⭐️', '⭐'].includes(stripped)) continue;
+                        
+                        if (stripped.includes("商品:") || stripped.includes("商品：")) {
+                            cleanedLines.push("", lines[i], "");
+                        } else {
+                            cleanedLines.push(lines[i]);
+                        }
+                    }
+
+                    let baseText = cleanedLines.join("\n").trim();
+                    if (baseText.endsWith("⸻")) {
+                        baseText = baseText.substring(0, baseText.lastIndexOf("⸻")).trim();
+                    }
+
+                    while (baseText.includes("\n\n\n")) {
+                        baseText = baseText.replace(/\n\n\n/g, "\n\n");
+                    }
+
+                    let styleAndPriceSection = "";
+                    if (abcOptionsList) {
+                        styleAndPriceSection += "\n\n款式：" + abcOptionsList;
+                    } else {
+                        styleAndPriceSection += "\n\n款式：" + styleUnit;
+                    }
+                    
+                    let priceLine = originalPriceStr ? "價格：" + originalPriceStr : "價格：";
+                    styleAndPriceSection += "\n\n" + priceLine;
+
+                    const footerTemplate = abcOptionsList ? FOOTER_B : FOOTER_A;
+                    
+                    const finalPostText = baseText.trim() + styleAndPriceSection + footerTemplate;
+
+                    const hasPriceTag = finalPostText.includes("價格：") || finalPostText.includes("價格:");
+                    const hasStyleTag = finalPostText.includes("款式：") || finalPostText.includes("款式:");
+
+                    if (!hasPriceTag) {
+                        errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【排版異常】未偵測到「價格：xxx」資訊！");
+                    }
+                    if (!hasStyleTag) {
+                        errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【排版異常】未偵測到「款式：xxx」資訊！");
+                    }
+
+                    row["貼文"] = finalPostText;
+                    txtOutputLines.push("\n\n" + postNum + "---------------\n\n" + finalPostText + "\n\n");
+                    
+                    return row;
+                });
+
+                if (errorLog.length > 0) {
+                    logSection.style.display = 'block';
+                    logText.value = errorLog.join("\n");
+                    alert("⚠️ 轉換完成，但發現部分貼文漏字或金額異常！請查看網頁下方提示。");
+                } else {
+                    alert("🎉 轉換成功！檔案完全沒有漏字或價格異常。");
+                }
+
+                exportToCSV(processedRows, "跟團中");
+                exportToTXT(txtOutputLines.join("\n"), "跟團中_純貼文版");
+                
+                fileName.textContent = "🎉 已成功下載：「跟團中.csv」＆「跟團中_純貼文版.txt」";
+            } catch (err) {
+                alert("❌ 檔案解析失敗！");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function exportToCSV(rows, baseFileName) {
+        if (rows.length === 0) return;
+        const headers = Object.keys(rows[0]);
+        const csvRows = [headers.join(",")];
+
+        rows.forEach(row => {
+            const values = headers.map(header => {
+                const val = row[header] === undefined || row[header] === null ? "" : String(row[header]);
+                return '"' + val.replace(/"/g, '""') + '"';
+            });
+            csvRows.push(values.join(","));
+        });
+
+        const csvContent = "\uFEFF" + csvRows.join("\r\n"); 
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = baseFileName + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function exportToTXT(content, baseFileName) {
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = baseFileName + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
