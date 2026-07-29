@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0728v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0729v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -100,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0728v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0729v1</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
-        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢大聲公與⚠️圖示！</b><br>
-        3. <b>[標題單位優先] 優先讀取「商品：...-組」與團購價金額單位，不再被頂端「42元/瓶」警語干擾！</b><br>
+        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語（含外觀/效期/退冰/細骨/海鮮等）、📢大聲公與⚠️圖示！</b><br>
+        3. <b>[標題單位優先] 優先讀取「商品: ...-組」與團購價金額單位，不再被頂端「42元/瓶」警語干擾！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -150,9 +149,7 @@
         }
     });
 
-    // 💡 升級版精準單位抓取：優先抓取標題行「商品: ...-組-」與價格「一組$55」，避開開頭「42元/瓶」標語
     function extractStyleUnit(text) {
-        // 1. 優先從「商品: ...」標題提取單位 (如 -組-、-包-、-瓶-)
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
             let prodText = mProd[1];
@@ -168,19 +165,16 @@
             }
         }
 
-        // 2. 從售價/團購價提取 (如「一組$55元」、「一組55」)
         let cleanText = text.replace(/\s+/g, ' ');
         let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個]|單[組包罐瓶盒支袋個])[\$💰]?\s*\d+/);
         if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
 
-        // 3. 檢查【規格】欄位 (如 3入／組、5入/包)
         let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個])/);
         if (mSpec) return "一" + mSpec[1];
 
         let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個])/);
         if (mSlash) return "一" + mSlash[1];
 
-        // 4. 最後搜尋內文「一組、一包、一罐...」
         let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|單包|單瓶|單罐|單組|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
@@ -295,15 +289,30 @@
 
                     let cleanBodyText = postText;
 
+                    // 💡 到貨與提醒清理
                     cleanBodyText = cleanBodyText.replace(/🚚\s*預計到貨日.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/溫馨提醒[:：]?.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀略有差異.*/g, "");
+
+                    // 💡 星星警語（全方位清理）
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[、，]?包裝略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*效期[、，]?口感與色澤.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*外包裝微凹陷磨損.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品口味因人而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*退冰出水或重量微差.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*料理食用時[，,]?請留意少量細骨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*天然海鮮個體不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依標示冷藏保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*飲用前請先搖勻.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*天然原料風味略有不同.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請全程冷凍保存.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食用前請充分加熱.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*配料比例略有不同.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*取貨請先檢查.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️.*/g, "");
 
+                    // 💡 ⚠️ 警語清理
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*因農產品受採收[、，]?天候及物流影響.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*到貨時間可能因氣候.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品採接單後安排生產.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*影片圖片僅供使用參考.*/g, "");
