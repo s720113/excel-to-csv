@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0729v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0729v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0729v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0729v3</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢生鮮水果購買須知與⚠️圖示！</b><br>
-        3. <b>[標題單位優先] 優先讀取「商品: ...-組」與團購價金額單位，不再被頂端「42元/瓶」警語干擾！</b><br>
+        3. <b>[增加「雙」單位] 支援「雙」單位識別（如 一雙、-雙-、代購價一雙），不再誤判為一組！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,33 +149,38 @@
         }
     });
 
+    // 💡 升級版精準單位抓取：加入「雙」單位 (如 -雙-、一雙、代購價一雙)
     function extractStyleUnit(text) {
+        // 1. 優先從「商品: ...」標題提取單位 (如 -組-、-包-、-雙-)
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
             let prodText = mProd[1];
-            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個])[-－—]/);
+            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙])[-－—]/);
             if (mDash) return "一" + mDash[1];
 
             let prodClean = prodText.replace(/\(.*?\)|（.*?）/g, '').trim();
             if (prodClean) {
                 let lastChar = prodClean.slice(-1);
-                if ("組包罐瓶盒支袋個".includes(lastChar)) {
+                if ("組包罐瓶盒支袋個雙".includes(lastChar)) {
                     return "一" + lastChar;
                 }
             }
         }
 
+        // 2. 從售價/代購價/團購價提取 (如「一雙 $ 29 元」、「一組$55」)
         let cleanText = text.replace(/\s+/g, ' ');
-        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個]|單[組包罐瓶盒支袋個])[\$💰]?\s*\d+/);
+        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙]|單[組包罐瓶盒支袋個雙])[\$💰]?\s*\d+/);
         if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
 
-        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個])/);
+        // 3. 檢查【規格】欄位 (如 3入／組、1雙/包)
+        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙])/);
         if (mSpec) return "一" + mSpec[1];
 
-        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個])/);
+        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙])/);
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|單包|單瓶|單罐|單組|一個)(?![多吃用途用方案好])/);
+        // 4. 搜尋內文「一組、一包、一雙...」
+        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|單包|單瓶|單罐|單組|單雙|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
@@ -185,7 +190,7 @@
         const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
         if (styleLineMatch && styleLineMatch[1].trim()) {
             let val = styleLineMatch[1].trim();
-            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包")) {
+            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙")) {
                 return val;
             }
         }
@@ -294,7 +299,7 @@
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/溫馨提醒[:：]?.*/g, "");
 
-                    // 💡 大聲公與購買須知清理 (含生鮮水果農產品須知)
+                    // 💡 大聲公與購買須知清理
                     cleanBodyText = cleanBodyText.replace(/📢\s*購買須知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
