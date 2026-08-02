@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0802v4</title>
+    <title>Excel 轉 CSV 智慧排版工具 0803v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0802v4</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0803v1</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢生鮮水果購買須知與⚠️圖示！</b><br>
-        3. <b>[藥商資訊更換] 精準比對將舊莊敬生活百貨藥商資料替換為「鑫宏商行」最新執照！</b><br>
+        3. <b>[增加「桶」單位] 支援「桶」單位識別（如 一桶、-桶-、優惠價一桶），不再誤判為一組！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,33 +149,34 @@
         }
     });
 
+    // 💡 精準單位抓取：加入「桶」、「片」、「雙」單位 (如 -桶-、一桶、優惠價一桶)
     function extractStyleUnit(text) {
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
             let prodText = mProd[1];
-            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙片])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙片])[-－—]/);
+            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶])[-－—]/);
             if (mDash) return "一" + mDash[1];
 
             let prodClean = prodText.replace(/\(.*?\)|（.*?）/g, '').trim();
             if (prodClean) {
                 let lastChar = prodClean.slice(-1);
-                if ("組包罐瓶盒支袋個雙片".includes(lastChar)) {
+                if ("組包罐瓶盒支袋個雙片桶".includes(lastChar)) {
                     return "一" + lastChar;
                 }
             }
         }
 
         let cleanText = text.replace(/\s+/g, ' ');
-        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙片]|單[組包罐瓶盒支袋個雙片])[\$💰]?\s*\d+/);
+        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙片桶]|單[組包罐瓶盒支袋個雙片桶])[\$💰]?\s*\d+/);
         if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
 
-        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙片])/);
+        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙片桶])/);
         if (mSpec) return "一" + mSpec[1];
 
-        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙片])/);
+        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙片桶])/);
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|單包|單瓶|單罐|單組|單雙|單片|一個)(?![多吃用途用方案好])/);
+        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|單包|單瓶|單罐|單組|單雙|單片|單桶|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
@@ -185,7 +186,7 @@
         const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
         if (styleLineMatch && styleLineMatch[1].trim()) {
             let val = styleLineMatch[1].trim();
-            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙") && !val.includes("一片")) {
+            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙") && !val.includes("一片") && !val.includes("一桶")) {
                 return val;
             }
         }
@@ -258,6 +259,11 @@
 
                     if (!postText.trim()) return row;
 
+                    // 💡 藥商執照資訊自動更換
+                    cleanBodyText = postText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
+
                     const styleUnit = extractStyleUnit(postText); 
                     const abcOptionsList = extractABCOptions(postText); 
 
@@ -286,13 +292,6 @@
                             errorLog.push("❌ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：尾端標籤價格 [" + originalPriceStr + "] 未在前段介紹中完全找到相符金額");
                         }
                     }
-
-                    let cleanBodyText = postText;
-
-                    // 💡 藥商執照資訊自動更換
-                    cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
                     // 💡 到貨與提醒清理
                     cleanBodyText = cleanBodyText.replace(/🚚\s*預計到貨日.*/g, "");
