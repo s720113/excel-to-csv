@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0803v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0804v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0803v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0804v1</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、溫馨提醒、⭐️星星警語、📢生鮮水果購買須知與⚠️圖示！</b><br>
-        3. <b>[增加「桶」單位] 支援「桶」單位識別（如 一桶、-桶-、優惠價一桶），不再誤判為一組！</b><br>
+        3. <b>[修復數字切斷款式] 款式名稱內含數字（如附2個保濕棉頭）不再被誤切，完整提取完整款式！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,7 +149,6 @@
         }
     });
 
-    // 💡 精準單位抓取：加入「桶」、「片」、「雙」單位 (如 -桶-、一桶、優惠價一桶)
     function extractStyleUnit(text) {
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
@@ -182,6 +181,7 @@
         return "一組";
     }
 
+    // 💡 升級版款式擷取：允許款式名稱中含有數字（如 A-拖把（附2個保濕棉頭）），不會被錯誤截斷
     function extractABCOptions(text) {
         const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
         if (styleLineMatch && styleLineMatch[1].trim()) {
@@ -204,12 +204,16 @@
 
             if (trimmed.includes("【型號】") || trimmed.includes("【規格】") || trimmed.includes("【材質】")) continue;
 
-            const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:][\s]*([^\$\d\n,，#＃\-－]+)/g;
+            // 抓取格式如：A-拖把（附2個保濕棉頭）一組 $ 8 8 元
+            const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:][\s]*([^\$\n💰]+)/g;
             let match;
             while ((match = abcLineRegex.exec(trimmed)) !== null) {
                 let rawLetter = match[1].toUpperCase();
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
-                let optionName = match[2].split("💰")[0].split("$")[0].trim();
+                let optionName = match[2].trim();
+
+                // 除去後面可能接的單位與價格標籤 (如 一組、一包、$、💰)
+                optionName = optionName.replace(/(一[組包罐瓶盒支袋個雙片桶]|單[組包罐瓶盒支袋個雙片桶]|特價|團購價|優惠價|\$|💰).*/, '').trim();
 
                 if (optionName && !optionName.startsWith("#") && !optionName.startsWith("＃") && !seenLetters.has(cleanLetter)) {
                     seenLetters.add(cleanLetter);
@@ -259,11 +263,6 @@
 
                     if (!postText.trim()) return row;
 
-                    // 💡 藥商執照資訊自動更換
-                    cleanBodyText = postText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
-
                     const styleUnit = extractStyleUnit(postText); 
                     const abcOptionsList = extractABCOptions(postText); 
 
@@ -292,6 +291,13 @@
                             errorLog.push("❌ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：尾端標籤價格 [" + originalPriceStr + "] 未在前段介紹中完全找到相符金額");
                         }
                     }
+
+                    let cleanBodyText = postText;
+
+                    // 💡 藥商執照資訊自動更換
+                    cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
                     // 💡 到貨與提醒清理
                     cleanBodyText = cleanBodyText.replace(/🚚\s*預計到貨日.*/g, "");
