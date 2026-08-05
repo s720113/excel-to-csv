@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0805v3</title>
+    <title>Excel 轉 CSV 智慧排版工具 0805v4</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v3</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v4</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、🚗工作日到貨通知、溫馨提醒、⭐️星星警語與⚠️圖示！</b><br>
-        3. <b>[增加「盞」單位] 支援「盞」單位識別（如 一盞、-盞-、團購價一盞），不再誤判為一組！</b><br>
+        3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,34 +149,36 @@
         }
     });
 
-    // 💡 精準單位抓取：加入「盞」、「桶」、「片」、「雙」單位 (如 -盞-、一盞)
+    // 💡 完整常見單位清單 (共 23 種)
+    const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙片桶盞件條顆粒根台把捲卷本張";
+
     function extractStyleUnit(text) {
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
             let prodText = mProd[1];
-            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶盞])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶盞])[-－—]/);
+            let mDash = prodText.match(new RegExp("[-－—]([" + UNITS_CHAR_SET + "])[-－—（\\(]")) || prodText.match(new RegExp("[-－—]([" + UNITS_CHAR_SET + "])[-－—]"));
             if (mDash) return "一" + mDash[1];
 
             let prodClean = prodText.replace(/\(.*?\)|（.*?）/g, '').trim();
             if (prodClean) {
                 let lastChar = prodClean.slice(-1);
-                if ("組包罐瓶盒支袋個雙片桶盞".includes(lastChar)) {
+                if (UNITS_CHAR_SET.includes(lastChar)) {
                     return "一" + lastChar;
                 }
             }
         }
 
         let cleanText = text.replace(/\s+/g, ' ');
-        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙片桶盞]|單[組包罐瓶盒支袋個雙片桶盞])[\$💰]?\s*\d+/);
+        let mPriceUnit = cleanText.match(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "])[\\$💰]?\\s*\\d+"));
         if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
 
-        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙片桶盞])/);
+        let mSpec = cleanText.match(new RegExp("【規格】[^\\n]*[／/]\\s*([" + UNITS_CHAR_SET + "])"));
         if (mSpec) return "一" + mSpec[1];
 
-        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙片桶盞])/);
+        let mSlash = cleanText.match(new RegExp("入\\s*[／/]\\s*([" + UNITS_CHAR_SET + "])"));
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|一個)(?![多吃用途用方案好])/);
+        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|一件|一條|一顆|一粒|一根|一台|一把|一捲|一卷|一本|一張|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|單件|單條|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
@@ -186,7 +188,14 @@
         const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
         if (styleLineMatch && styleLineMatch[1].trim()) {
             let val = styleLineMatch[1].trim();
-            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙") && !val.includes("一片") && !val.includes("一桶") && !val.includes("一盞")) {
+            let hasUnit = false;
+            for (let u of UNITS_CHAR_SET) {
+                if (val.includes("一" + u)) {
+                    hasUnit = true;
+                    break;
+                }
+            }
+            if (!hasUnit && !val.includes("一個")) {
                 return val;
             }
         }
@@ -211,7 +220,7 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                optionName = optionName.replace(/(一[組包罐瓶盒支袋個雙片桶盞]|單[組包罐瓶盒支袋個雙片桶盞]|特價|團購價|優惠價|\$|💰).*/, '').trim();
+                optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
                 if (optionName && !optionName.startsWith("#") && !optionName.startsWith("＃") && !seenLetters.has(cleanLetter)) {
                     seenLetters.add(cleanLetter);
