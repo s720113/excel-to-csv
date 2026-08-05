@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0805v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0805v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,9 +99,9 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹，不被 ⸻ 誤切！</b><br>
+        1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、🚗工作日到貨通知、溫馨提醒、⭐️星星警語與⚠️圖示！</b><br>
         3. <b>[藥商資訊更換] 精準比對將舊莊敬生活百貨藥商資料替換為「鑫宏商行」最新執照！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
@@ -296,8 +296,9 @@
                     cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
                     cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
-                    // 💡 到貨與提醒清理 (含 🚗到貨日 清理)
+                    // 💡 到貨與提醒清理
                     cleanBodyText = cleanBodyText.replace(/🚚\s*預計到貨日.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/🚚\s*到貨日[:：]?.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚗\s*到貨日[:：]?.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚗.*/g, "");
@@ -314,8 +315,12 @@
                     cleanBodyText = cleanBodyText.replace(/天然外觀差異[、，]?口感[、，]?甜度等因素恕不列入退換貨範圍.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/若收到商品有嚴重碰傷或腐敗.*/g, "");
 
-                    // 💡 星星警語（全方位清理）
+                    // 💡 星星警語（精準清理，避免傷及「⭐️團購價/優惠價」價格行）
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[、，]?包裝略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請先檢查.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用[、，]?組裝或清洗後.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用感受因人而異.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*效期[、，]?口感與色澤.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*外包裝微凹陷磨損.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食品口味因人而異.*/g, "");
@@ -329,7 +334,6 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食用前請充分加熱.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*配料比例略有不同.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*取貨請先檢查.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️.*/g, "");
 
                     // 💡 ⚠️ 警語清理
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*鮮奶因配送時間因素[，,]?到貨效期較短.*/g, "");
@@ -402,7 +406,7 @@
                     const cleanedLines = [];
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        if (!stripped || ['⚠️', '—', '-', '📢', '📌', '⭐️', '⭐'].includes(stripped)) continue;
+                        if (!stripped || ['⚠️', '—', '-', '📢', '📌'].includes(stripped)) continue;
                         
                         if (stripped.includes("商品:") || stripped.includes("商品：")) {
                             cleanedLines.push("", lines[i], "");
@@ -459,7 +463,7 @@
                 }
 
                 exportToCSV(processedRows, "跟團中");
-                exportToTXT(txtOutputLines.join("\n"), "跟團中_純貼文版");
+                exportToTXT(txtOutputLines.join("\n"), "跟团中_純貼文版");
                 
                 fileName.textContent = "🎉 已成功下載：「跟團中.csv」＆「跟團中_純貼文版.txt」";
             } catch (err) {
