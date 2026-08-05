@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0805v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0805v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v3</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
         2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、🚗工作日到貨通知、溫馨提醒、⭐️星星警語與⚠️圖示！</b><br>
-        3. <b>[藥商資訊更換] 精準比對將舊莊敬生活百貨藥商資料替換為「鑫宏商行」最新執照！</b><br>
+        3. <b>[增加「盞」單位] 支援「盞」單位識別（如 一盞、-盞-、團購價一盞），不再誤判為一組！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,33 +149,34 @@
         }
     });
 
+    // 💡 精準單位抓取：加入「盞」、「桶」、「片」、「雙」單位 (如 -盞-、一盞)
     function extractStyleUnit(text) {
         let mProd = text.match(/商品[:：]\s*([^\n]+)/);
         if (mProd) {
             let prodText = mProd[1];
-            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶])[-－—]/);
+            let mDash = prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶盞])[-－—（\(]/) || prodText.match(/[-－—]([組包罐瓶盒支袋個雙片桶盞])[-－—]/);
             if (mDash) return "一" + mDash[1];
 
             let prodClean = prodText.replace(/\(.*?\)|（.*?）/g, '').trim();
             if (prodClean) {
                 let lastChar = prodClean.slice(-1);
-                if ("組包罐瓶盒支袋個雙片桶".includes(lastChar)) {
+                if ("組包罐瓶盒支袋個雙片桶盞".includes(lastChar)) {
                     return "一" + lastChar;
                 }
             }
         }
 
         let cleanText = text.replace(/\s+/g, ' ');
-        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙片桶]|單[組包罐瓶盒支袋個雙片桶])[\$💰]?\s*\d+/);
+        let mPriceUnit = cleanText.match(/(一[組包罐瓶盒支袋個雙片桶盞]|單[組包罐瓶盒支袋個雙片桶盞])[\$💰]?\s*\d+/);
         if (mPriceUnit) return mPriceUnit[1].replace("單", "一");
 
-        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙片桶])/);
+        let mSpec = text.match(/【規格】[^\n]*[／/]\s*([組包罐瓶盒支袋個雙片桶盞])/);
         if (mSpec) return "一" + mSpec[1];
 
-        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙片桶])/);
+        let mSlash = text.match(/入\s*[／/]\s*([組包罐瓶盒支袋個雙片桶盞])/);
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|單包|單瓶|單罐|單組|單雙|單片|單桶|一個)(?![多吃用途用方案好])/);
+        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
@@ -185,7 +186,7 @@
         const styleLineMatch = text.match(/款式[:：]\s*([^\n]+)/);
         if (styleLineMatch && styleLineMatch[1].trim()) {
             let val = styleLineMatch[1].trim();
-            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙") && !val.includes("一片") && !val.includes("一桶")) {
+            if (!val.includes("一個") && !val.includes("一組") && !val.includes("一包") && !val.includes("一雙") && !val.includes("一片") && !val.includes("一桶") && !val.includes("一盞")) {
                 return val;
             }
         }
@@ -210,7 +211,7 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                optionName = optionName.replace(/(一[組包罐瓶盒支袋個雙片桶]|單[組包罐瓶盒支袋個雙片桶]|特價|團購價|優惠價|\$|💰).*/, '').trim();
+                optionName = optionName.replace(/(一[組包罐瓶盒支袋個雙片桶盞]|單[組包罐瓶盒支袋個雙片桶盞]|特價|團購價|優惠價|\$|💰).*/, '').trim();
 
                 if (optionName && !optionName.startsWith("#") && !optionName.startsWith("＃") && !seenLetters.has(cleanLetter)) {
                     seenLetters.add(cleanLetter);
@@ -463,7 +464,7 @@
                 }
 
                 exportToCSV(processedRows, "跟團中");
-                exportToTXT(txtOutputLines.join("\n"), "跟团中_純貼文版");
+                exportToTXT(txtOutputLines.join("\n"), "跟團中_純貼文版");
                 
                 fileName.textContent = "🎉 已成功下載：「跟團中.csv」＆「跟團中_純貼文版.txt」";
             } catch (err) {
