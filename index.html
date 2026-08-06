@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0805v4</title>
+    <title>Excel 轉 CSV 智慧排版工具 0806v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0805v4</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0806v1</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
-        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、🚗工作日到貨通知、溫馨提醒、⭐️星星警語與⚠️圖示！</b><br>
+        2. 💡 <b>[超強大掃除] 徹底刪除🚚預計到貨日、🚗工作日到貨通知、溫馨提醒、⭐️星星警語（含洗滌/防護/就醫提示）與⚠️圖示！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -149,7 +149,6 @@
         }
     });
 
-    // 💡 完整常見單位清單 (共 23 種)
     const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙片桶盞件條顆粒根台把捲卷本張";
 
     function extractStyleUnit(text) {
@@ -326,7 +325,26 @@
                     cleanBodyText = cleanBodyText.replace(/若收到商品有嚴重碰傷或腐敗.*/g, "");
 
                     // 💡 星星警語（精準清理，避免傷及「⭐️團購價/優惠價」價格行）
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[、，]?包裝略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*影片圖片僅供使用參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品如有瑕疵請於規定期限內辦理退換貨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品請確認尺寸後再下訂.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品因拍攝光線[、，]?螢幕顯示及生產批次不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀略有差異[，,]?請以實際到貨為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依標示妥善保存[，,]?維持最佳新鮮風味.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品請依建議保存[，,]?開封後盡快享用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色略有差異[，,]?請以實際到貨為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*尺寸為人工測量[，,]?請先確認尺寸再安心下單.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*線頭[、，]?摺痕或些微氣味[，,]?屬新品正常現象.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*深色衣物首次清洗[，,]?建議單獨洗滌更安心.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用時請保持通風[，,]?請勿與其他清潔劑混合使用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*若不慎接觸眼睛或不適[，,]?請沖水並盡速就醫.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*特殊材質請先小範圍測試[，,]?確認後再安心使用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*頑垢可能需多次清潔[，,]?效果依髒污程度而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*敏感肌或長時間使用[，,]?建議配戴手套更安心.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*如有不適請停止使用[，,]?並以清水沖洗後就醫.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝外觀略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品拆封或使用後[，,]?除瑕疵外恕無法退換.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品介紹供參考[，,]?實際使用感受因人而異.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色略有差異.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請先檢查.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用[、，]?組裝或清洗後.*/g, "");
