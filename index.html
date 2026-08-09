@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0810v5</title>
+    <title>Excel 轉 CSV 智慧排版工具 0810v6</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0810v5</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0810v6</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
-        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 商品外觀、包裝略有差異...」及所有變體警語！</b><br>
+        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 肉品油花/易碎食品碎裂...」及所有變體警語！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -329,6 +329,8 @@
                     // 💡 星星與⚠️特別警語清理（超級寬鬆全比對，覆蓋所有變化語句）
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[^\n]*?(?:實際到貨|到貨).*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝外觀[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*肉品油花[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*易碎食品[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*如果上面有浮油是正常的[、，]?攪拌後即可食用[！!]?.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*少量分層[、，]?出水或沉澱[，,]?屬正常現象請安心.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*天然食材風味略有不同[，,]?展現食材特色.*/g, "");
@@ -348,7 +350,6 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*孕婦[、，]?用藥或特殊體質者[，,]?食用前請先諮詢專業人士.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用後[，,]?恕無法辦理退換貨.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*外盒輕微擠壓凹損[，,]?不影響品質與正常使用.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*易碎食品些微碎裂[、，]?外包裝微凹陷磨損[，,]?不影響品質可安心食用.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝輕微擠壓凹損[，,]?不影響品質與正常使用.*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*影片圖片僅供使用參考.*/g, "");
