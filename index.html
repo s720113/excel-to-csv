@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0810v3</title>
+    <title>Excel 轉 CSV 智慧排版工具 0810v4</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0810v3</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0810v4</h1>
     <div class="subtitle">
         1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
-        2. 💡 <b>[超強大掃除] 包含「到貨日」全整行自動刪除！溫馨提醒、⭐️星星警語（含浮油/沉澱/分層提示）與⚠️圖示全掃除！</b><br>
+        2. 💡 <b>[超強大掃除] 包含「規格：A.B.C...」整行自動刪除防重複！包含「到貨日」全整行自動刪除！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -212,7 +212,7 @@
 
             if (trimmed.includes("【型號】") || trimmed.includes("【規格】") || trimmed.includes("【材質】")) continue;
 
-            const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:][\s]*([^\$\n💰]+)/g;
+            const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
             while ((match = abcLineRegex.exec(trimmed)) !== null) {
                 let rawLetter = match[1].toUpperCase();
@@ -304,6 +304,10 @@
                     cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
                     cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
                     cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
+
+                    // 💡 清理「規格：...」這整行（避免與自動產生的款式欄重複）
+                    cleanBodyText = cleanBodyText.replace(/^規格[:：].*/gm, "");
+                    cleanBodyText = cleanBodyText.replace(/規格[:：].*/g, "");
 
                     // 💡 到貨日全通用清理：只要包含「到貨日」整行自動刪除
                     cleanBodyText = cleanBodyText.replace(/.*到貨日.*/g, "");
