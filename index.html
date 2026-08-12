@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0812v3</title>
+    <title>Excel 轉 CSV 智慧排版工具 0812v4</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0812v3</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0812v4</h1>
     <div class="subtitle">
-        1. 💡 <b>[完整保留] 100% 保留所有商品特色與規格介紹（如「✅規格:100%天然柳橙汁1L/罐」），不誤刪！</b><br>
-        2. 💡 <b>[超強大掃除] 精準僅刪除 ABCD 選項型規格，保留真實規格！到貨日整行刪除！</b><br>
+        1. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
+        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 食品些微裂痕/少量魚鱗或血水...」及所有變體警語！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -336,6 +336,8 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*電池屬消耗品[^\n]*/g, "");
 
                     // 💡 星星與⚠️特別警語清理（超級寬鬆全比對，覆蓋所有變化語句）
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品些微裂痕[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量魚鱗[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*原裝箱可能含有[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*真空輕微失真空[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*輕微擠壓凹損[^\n]*/g, "");
@@ -354,7 +356,6 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*天然食材風味略有不同[，,]?展現食材特色.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*重量[、，]?尺寸略有差異[，,]?請依包裝標示為準.*/g, "");
 
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量魚鱗[、，]?細刺或血水[，,]?屬天然正常現象.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*手工烘焙商品[，,]?每批外觀皆有些許不同.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*退冰後些微裂痕或變形[，,]?屬正常現象.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*使用前請詳閱說明[，,]?依指示操作[，,]?避免自行拆修.*/g, "");
