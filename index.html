@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0813v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0814v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0813v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0814v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[智慧分隔線] 「款式」上方自動補齊 ⸻ 分隔線（若原本已存在則不重複補）！</b><br>
-        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 立即冷凍/結霜/冰品全程冷凍...」及所有變體警語！</b><br>
+        1. 💡 <b>[智慧分隔線] 清理多餘的全形/半形破折號（如 －），使「款式」上方永遠乾淨只留一條 ⸻！</b><br>
+        2. 💡 <b>[完整保留] 100% 保留內文所有商品特色介紹與「⭐️團購價/優惠價」，不被誤刪！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -489,7 +489,8 @@
                     const cleanedLines = [];
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        if (!stripped || ['⚠️', '—', '-', '📢', '📌'].includes(stripped)) continue;
+                        // 包含過濾全形及半形破折號 －, —, ⸻, -
+                        if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
                         if (stripped.includes("商品:") || stripped.includes("商品：")) {
                             cleanedLines.push("", lines[i], "");
@@ -500,9 +501,9 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
-                    // 💡 尾端⸻清理，確保不留下多餘的分隔線
-                    if (baseText.endsWith("⸻")) {
-                        baseText = baseText.substring(0, baseText.lastIndexOf("⸻")).trim();
+                    // 💡 尾端⸻或全形破折號清理，確保不留下多餘分隔符號
+                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-")) {
+                        baseText = baseText.replace(/[⸻－—-]+\s*$/, "").trim();
                     }
 
                     while (baseText.includes("\n\n\n")) {
