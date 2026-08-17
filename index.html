@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0817v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0817v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0817v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0817v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[智慧分隔線] 清理多餘的全形/半形破折號（如 －），使「款式」上方永遠乾淨只留一條 ⸻！</b><br>
-        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 重量略有差異/烘焙食品些微碎裂...」及所有變體警語！</b><br>
+        1. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
+        2. 💡 <b>[雙重檢核] 包含金額不一致、缺少價格或款式自動警告提示！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -268,6 +268,18 @@
                     const rowNum = idx + 2;  
 
                     if (!postText.trim()) return row;
+
+                    // 💡 結單日偵測檢查
+                    const prodMatch = postText.match(/商品[:：]\s*([^\n]+)/);
+                    if (prodMatch) {
+                        const prodLine = prodMatch[1];
+                        const hasDeadline = /結單|收單|截止|(\d{1,2}[/／]\d{1,2})/.test(prodLine);
+                        if (!hasDeadline) {
+                            errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【商品名稱未標示結單日】商品名稱中未偵測到結單時間（如：(8/18結單)）！");
+                        }
+                    } else {
+                        errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【未偵測到商品名稱】貼文中找不到「商品:」標籤！");
+                    }
 
                     const styleUnit = extractStyleUnit(postText); 
                     const abcOptionsList = extractABCOptions(postText); 
