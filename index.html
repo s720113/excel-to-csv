@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0822v4</title>
+    <title>Excel 轉 CSV 智慧排版工具 0822v5</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,7 +99,7 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0822v4</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0822v5</h1>
     <div class="subtitle">
         1. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
         2. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
@@ -311,9 +311,9 @@
                     }
 
                     let cleanBodyText = postText;
-                     // 💡 刪除「梅姐」與其相關修飾詞（例如：梅姐嚴選、梅姐）
+                    // 💡 刪除「梅姐」與其相關修飾詞（例如：梅姐嚴選、梅姐推薦、梅姐）
                      cleanBodyText = cleanBodyText.replace(/⏰\s*\d{1,2}[/／]\d{1,2}\s*結單[。.]?/g, "");
-                     cleanBodyText = cleanBodyText.replace(/梅姐[^\s。]*[。.]?/g, "");
+                     cleanBodyText = cleanBodyText.replace(/梅姐[^\n\s]*[\s:：]*[。.]?/g, "");
                      cleanBodyText = cleanBodyText.replace(/\d+[-－—~～]\d+\s*天到貨[。.]?/g, "");
 
 
