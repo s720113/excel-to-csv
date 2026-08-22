@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0822v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0822v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0822v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0822v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
-        2. 💡 <b>[超強大掃除] 精準辨識並整行刪除 A. / A：/ A- / A、等各式規格選項列，保留真實商品內容規格！</b><br>
+        1. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
+        2. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -519,11 +519,18 @@
 
                     const lines = cleanBodyText.split("\n");
                     const cleanedLines = [];
+                    const abcLineRegex = /^(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*[^\$\n💰]+/;
+                    let lastAbcIdx = -1;
+
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
                         // 包含過濾全形及半形破折號 －, —, ⸻, -
                         if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
+                        if (abcLineRegex.test(stripped)) {
+                            lastAbcIdx = cleanedLines.length;
+                        }
+
                         if (stripped.includes("商品:") || stripped.includes("商品：")) {
                             cleanedLines.push("", lines[i], "");
                         } else {
@@ -531,35 +538,105 @@
                         }
                     }
 
+                    // 💡 如果有 ABC 選項列，自動在最後一個選項下方插入一條 ⸻ 分隔線
+                    if (lastAbcIdx !== -1) {
+                        cleanedLines.splice(lastAbcIdx + 1, 0, "⸻");
+                    }
+
                     let baseText = cleanedLines.join("\n").trim();
 
                     // 💡 尾端⸻或全形破折號清理，確保不留下多餘分隔符號
                     while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-")) {
-                        baseText = baseText.replace(/[⸻－代碼底部的結束部分我也幫您檢查並完美銜接補齊囉！完整 HTML 程式碼如下：
+                        baseText = baseText.replace(/[⸻－—-]+\s*$/, "").trim();
+                    }
 
-```html
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0821v1</title>
-    <script src="[https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js](https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js)"></script>
-    <style>
-        :root {
-            --primary-color: #2e7d32;
-            --primary-hover: #1b5e20;
-            --bg-color: #f1f8e9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #a5d6a7;
-        }
-        * { box-sizing: border-box; font-family: "Microsoft JhengHei", -apple-system, sans-serif; }
-        body {
-            background-color: var(--bg-color);
-            color:
+                    while (baseText.includes("\n\n\n")) {
+                        baseText = baseText.replace(/\n\n\n/g, "\n\n");
+                    }
 
-```python?code_reference&code_event_index=2
-# Double check regex in JS string substitution
-js_part = 'baseText = baseText.replace(/[⸻－—-]+\\s*$/, "").trim();'
-print("JS regex escaped properly.")
+                    // 💡 在「款式」上方自動補齊 ⸻ 分隔線
+                    let styleAndPriceSection = "\n\n⸻";
+                    if (abcOptionsList) {
+                        styleAndPriceSection += "\n\n款式：" + abcOptionsList;
+                    } else {
+                        styleAndPriceSection += "\n\n款式：" + styleUnit;
+                    }
+                    
+                    let priceLine = originalPriceStr ? "價格：" + originalPriceStr : "價格：";
+                    styleAndPriceSection += "\n\n" + priceLine;
+
+                    const footerTemplate = abcOptionsList ? FOOTER_B : FOOTER_A;
+                    
+                    const finalPostText = baseText.trim() + styleAndPriceSection + footerTemplate;
+
+                    const hasPriceTag = finalPostText.includes("價格：") || finalPostText.includes("價格:");
+                    const hasStyleTag = finalPostText.includes("款式：") || finalPostText.includes("款式:");
+
+                    if (!hasPriceTag) {
+                        errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【排版異常】未偵測到「價格：xxx」資訊！");
+                    }
+                    if (!hasStyleTag) {
+                        errorLog.push("⚠️ 貼文【第 " + postNum + " 筆 / Excel 第 " + rowNum + " 行】：【排版異常】未偵測到「款式：xxx」資訊！");
+                    }
+
+                    row["貼文"] = finalPostText;
+                    txtOutputLines.push("\n\n" + postNum + "---------------\n\n" + finalPostText + "\n\n");
+                    
+                    return row;
+                });
+
+                if (errorLog.length > 0) {
+                    logSection.style.display = 'block';
+                    logText.value = errorLog.join("\n");
+                    alert("⚠️ 轉換完成，但發現部分貼文漏字或金額異常！請查看網頁下方提示。");
+                } else {
+                    alert("🎉 轉換成功！檔案完全沒有漏字或價格異常。");
+                }
+
+                exportToCSV(processedRows, "跟團中");
+                exportToTXT(txtOutputLines.join("\n"), "跟團中_純貼文版");
+                
+                fileName.textContent = "🎉 已成功下載：「跟團中.csv」＆「跟團中_純貼文版.txt」";
+            } catch (err) {
+                alert("❌ 檔案解析失敗！");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function exportToCSV(rows, baseFileName) {
+        if (rows.length === 0) return;
+        const headers = Object.keys(rows[0]);
+        const csvRows = [headers.join(",")];
+
+        rows.forEach(row => {
+            const values = headers.map(header => {
+                const val = row[header] === undefined || row[header] === null ? "" : String(row[header]);
+                return '"' + val.replace(/"/g, '""') + '"';
+            });
+            csvRows.push(values.join(","));
+        });
+
+        const csvContent = "\uFEFF" + csvRows.join("\r\n"); 
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = baseFileName + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function exportToTXT(content, baseFileName) {
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = baseFileName + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
