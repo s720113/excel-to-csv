@@ -223,7 +223,7 @@
 
                 if (optionName && !optionName.startsWith("#") && !optionName.startsWith("＃") && !seenLetters.has(cleanLetter)) {
                     seenLetters.add(cleanLetter);
-                    options.push(cleanLetter + "-" + optionName);
+                    options.push(cleanLetter + "：" + optionName);
                 }
             }
         }
