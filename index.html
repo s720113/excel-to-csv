@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0822v5</title>
+    <title>Excel 轉 CSV 智慧排版工具 0823v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0822v5</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0823v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
-        2. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
+        1. 💡 <b>[精準稱呼清理] 僅清理「梅姐」名稱，完整保留「嚴選來自高海拔甜柿」等內文介紹！</b><br>
+        2. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -311,11 +311,11 @@
                     }
 
                     let cleanBodyText = postText;
-                    // 💡 刪除「梅姐」與其相關修飾詞（例如：梅姐嚴選、梅姐推薦、梅姐）
-                     cleanBodyText = cleanBodyText.replace(/⏰\s*\d{1,2}[/／]\d{1,2}\s*結單[。.]?/g, "");
-                     cleanBodyText = cleanBodyText.replace(/梅姐[^\n\s]*[\s:：]*[。.]?/g, "");
-                     cleanBodyText = cleanBodyText.replace(/\d+[-－—~～]\d+\s*天到貨[。.]?/g, "");
 
+                    // 💡 精準清理「梅姐」稱呼，保留後續特色文案（如：嚴選來自高海拔甜柿）
+                    cleanBodyText = cleanBodyText.replace(/⏰\s*\d{1,2}[/／]\d{1,2}\s*結單[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/梅姐(?:嚴選|推薦)?[\s:：]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/\d+[-－—~～]\d+\s*天到貨[。.]?/g, "");
 
                     // 💡 藥商執照資訊自動更換
                     cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
