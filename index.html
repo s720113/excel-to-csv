@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0826v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0826v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[孤立符號過濾] 自動清理殘留的單獨 ⭐/⭐️ 星星符號，避免排版尾端留白出現錯字！</b><br>
-        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 少量冰晶/蔬果大小形狀/商品重量顏色...」及所有變體警語！</b><br>
+        1. 💡 <b>[精準規格保護] 100% 保留「規格重量 1000g」、「保存方式 -18度c」與「過敏原資訊」不被誤刪！</b><br>
+        2. 💡 <b>[孤立符號過濾] 自動清理殘留的單獨 ⭐/⭐️ 星星符號，避免排版尾端留白出現錯字！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -210,14 +210,18 @@
         for (let line of lines) {
             let trimmed = line.trim();
 
-            if (trimmed.includes("【型號】") || trimmed.includes("【材質】")) continue;
+            if (trimmed.includes("【型號】") || trimmed.includes("【材質】") || trimmed.includes("【保存方式】") || trimmed.includes("度c")) continue;
 
+            // 💡 解析選項字母，排除度c/cm/ml等單位字母誤判
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
             while ((match = abcLineRegex.exec(trimmed)) !== null) {
                 let rawLetter = match[1].toUpperCase();
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
+
+                // 排除溫度或單位字母誤當選項
+                if (trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
@@ -332,8 +336,8 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬果大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
 
-                    // 💡 升級版規格選項整行刪除（無論 A. A： A- A、 A 均自動刪除選項整行，不傷及純內容規格）
-                    cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】).*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[\s]*[-－—：:.。、\s].*/gm, "");
+                    // 💡 精準清理「規格選項列」，避免誤刪 ❇【規格重量】1000g 這種真實內容規格！
+                    cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】)\s*[:：]?\s*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。、].*/gm, "");
 
                     // 💡 到貨日全通用清理：只要包含「到貨日」整行自動刪除
                     cleanBodyText = cleanBodyText.replace(/.*到貨日.*/g, "");
@@ -486,7 +490,6 @@
                     cleanBodyText = cleanBodyText.replace(/請以實際到貨商品為準.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品請依包裝標示方式妥善保存.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/因離開冷藏環境過久.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⚠️\s*過敏原資訊.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*取貨時請立即確認商品及包裝狀況.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/如有破損、退冰、變質.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/逾期、商品已烹調食用或無法提供佐證者.*/g, "");
@@ -508,9 +511,7 @@
 
                     cleanBodyText = cleanBodyText.replace(/不適合對相關成分過敏者食用.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品有效期限、外觀、口感、色澤及風味.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/屬正常現象，請依外包裝標示為準.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*餅乾、糕餅、酥脆類.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/若不影響商品本身品質及食用安全，恕不列入退換貨範圍.*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/商品請全程冷凍並依外包裝標示妥善保存.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/因取貨逾時、保存不當或自行退冰所造成之品質變化.*/g, "");
