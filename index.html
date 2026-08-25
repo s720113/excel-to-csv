@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0826v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0826v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v3</h1>
     <div class="subtitle">
-        1. 💡 <b>[精準規格保護] 100% 保留「規格重量 1000g」、「保存方式 -18度c」與「過敏原資訊」不被誤刪！</b><br>
-        2. 💡 <b>[孤立符號過濾] 自動清理殘留的單獨 ⭐/⭐️ 星星符號，避免排版尾端留白出現錯字！</b><br>
+        1. 💡 <b>[孤立星星全面掃除] 升級 Unicode 解析，徹底消除帶有隱形符號的殘留 ⭐/⭐️ 星星！</b><br>
+        2. 💡 <b>[精準規格保護] 100% 保留「規格重量 1000g」、「保存方式 -18度c」與「過敏原資訊」不被誤刪！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -540,8 +540,9 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 包含過濾孤立符號與全形及半形破折號 －, —, ⸻, -, ⭐, ⭐️
-                        if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌', '⭐', '⭐️'].includes(stripped)) continue;
+                        // 💡 徹底過濾任何夾帶隱形符號/空格的孤立星星列（如 ⭐、⭐️）
+                        const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0]*[⭐⭐️][\s\uFE0F\u200B\u00A0]*$/.test(stripped);
+                        if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
                         if (abcLineRegex.test(stripped)) {
                             lastAbcIdx = cleanedLines.length;
