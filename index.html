@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0825v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0825v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0825v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0825v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[精準款式抓取] 自動過濾「M：建議體重...」等尺寸數據說明，徹底解決款式錯位跑掉問題！</b><br>
-        2. 💡 <b>[智慧提示] 新增「未標示結單日」自動偵測提醒，避免漏寫結單時間！</b><br>
+        1. 💡 <b>[精準稱呼清理] 僅清理「梅姐」名稱，完整保留「嚴選來自高海拔甜柿」等內文介紹！</b><br>
+        2. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -207,26 +207,10 @@
         };
 
         const lines = text.split("\n");
-        let inSizeSection = false;
-
         for (let line of lines) {
             let trimmed = line.trim();
 
             if (trimmed.includes("【型號】") || trimmed.includes("【材質】")) continue;
-
-            // 💡 判斷是否為「尺寸數據說明區塊」（例如：【尺寸參考】、建議體重...）
-            if (trimmed.includes("【尺寸】") || trimmed.includes("【尺寸參考】") || trimmed.includes("尺寸參考")) {
-                inSizeSection = true;
-                continue;
-            }
-            if (inSizeSection && (trimmed.startsWith("✅") || trimmed.startsWith("【"))) {
-                inSizeSection = false;
-            }
-
-            // 💡 如果是尺寸說明的數據（含：建議體重、胸圍、腰圍、下擺、衣長、褲長），絕對不抓做款式！
-            if (inSizeSection || /建議體重|胸圍|腰圍|下擺|衣長|褲長|肩寬|袖長|體重\d+/.test(trimmed)) {
-                continue;
-            }
 
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
@@ -338,12 +322,6 @@
                     cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
                     cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
-                    // 💡 口罩與個人衛生用品警語清理
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?尺寸及包裝可能因批次略有差異[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認尺寸[、，]?規格及適用對象[，,]?配戴鬆緊[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*口罩屬個人衛生用品[，,]?拆封或使用後基於衛生考量[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依商品標示正確配戴及保存[，,]?因保存不當[^\n]*/g, "");
-
                     // 💡 升級版規格選項整行刪除（無論 A. A： A- A、 A 均自動刪除選項整行，不傷及純內容規格）
                     cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】).*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[\s]*[-－—：:.。、\s].*/gm, "");
 
@@ -367,7 +345,7 @@
                     // 💡 餐具/陶瓷玻璃/生活用品警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或清洗後[，,]?恕無法辦理退換貨[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色及紋理可能因製程[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*陶瓷[、，]?玻璃制品可能有微小氣泡[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*陶瓷[、，]?玻璃製品可能有微小氣泡[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請立即檢查[，,]?如有破裂[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品經清洗[、，]?使用或拆除保護包裝後[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請避免碰撞[、，]?摔落及劇烈溫差[^\n]*/g, "");
@@ -382,7 +360,7 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*烘焙食品[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*重量略有差異[，,]?請依包裝標示為準[^\n]*/g, "");
 
-                    // 💡 冷冷凍與冰品相關警語清理
+                    // 💡 冷凍與冰品相關警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*少量冰晶[、，]?結霜或變形[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
@@ -621,7 +599,7 @@
                 }
 
                 exportToCSV(processedRows, "跟團中");
-                exportToTXT(txtOutputLines.join("\n"), "跟团中_純貼文版");
+                exportToTXT(txtOutputLines.join("\n"), "跟團中_純貼文版");
                 
                 fileName.textContent = "🎉 已成功下載：「跟團中.csv」＆「跟團中_純貼文版.txt」";
             } catch (err) {
