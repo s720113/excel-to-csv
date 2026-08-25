@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0826v3_Fix</title>
+    <title>Excel 轉 CSV 智慧排版工具 0826v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v3_Fix</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v3</h1>
     <div class="subtitle">
-        1. 💡 <b>[回歸 V3 核心] 完美保留文章特色、重量規格與過敏原資訊，不因比對而誤刪文章！</b><br>
-        2. 💡 <b>[安全星星擦除] 自動將尾端殘留的孤立 ⭐/⭐️ 星星擦除乾淨，版面乾淨不留尾巴！</b><br>
+        1. 💡 <b>[孤立星星全面掃除] 升級 Unicode 解析，徹底消除帶有隱形符號的殘留 ⭐/⭐️ 星星！</b><br>
+        2. 💡 <b>[精準規格保護] 100% 保留「規格重量 1000g」、「保存方式 -18度c」與「過敏原資訊」不被誤刪！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -210,14 +210,18 @@
         for (let line of lines) {
             let trimmed = line.trim();
 
-            if (trimmed.includes("【型號】") || trimmed.includes("【材質】")) continue;
+            if (trimmed.includes("【型號】") || trimmed.includes("【材質】") || trimmed.includes("【保存方式】") || trimmed.includes("度c")) continue;
 
+            // 💡 解析選項字母，排除度c/cm/ml等單位字母誤判
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
             while ((match = abcLineRegex.exec(trimmed)) !== null) {
                 let rawLetter = match[1].toUpperCase();
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
+
+                // 排除溫度或單位字母誤當選項
+                if (trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
@@ -312,12 +316,30 @@
 
                     let cleanBodyText = postText;
 
+                    // 💡 精準清理「梅姐」稱呼，保留後續特色文案（如：嚴選來自高海拔甜柿）
+                    cleanBodyText = cleanBodyText.replace(/⏰\s*\d{1,2}[/／]\d{1,2}\s*結單[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/梅姐(?:嚴選|推薦)?[\s:：]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/\d+[-－—~～]\d+\s*天到貨[。.]?/g, "");
+
                     // 💡 藥商執照資訊自動更換
                     cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
                     cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
                     cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
-                    // 💡 通用性到貨日與溫馨提醒標頭清理
+                    // 💡 口罩與個人衛生用品警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?尺寸及包裝可能因批次略有差異[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認尺寸[、，]?規格及適用對象[，,]?配戴鬆緊[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*口罩屬個人衛生用品[，,]?拆封或使用後基於衛生考量[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依商品標示正確配戴及保存[，,]?因保存不當[^\n]*/g, "");
+
+                    // 💡 蔬果與食材警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬果大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
+
+                    // 💡 精準清理「規格選項列」，避免誤刪 ❇【規格重量】1000g 這種真實內容規格！
+                    cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】)\s*[:：]?\s*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。、].*/gm, "");
+
+                    // 💡 到貨日全通用清理：只要包含「到貨日」整行自動刪除
                     cleanBodyText = cleanBodyText.replace(/.*到貨日.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚗.*/g, "");
@@ -328,6 +350,184 @@
                     cleanBodyText = cleanBodyText.replace(/📢\s*購買須知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/生鮮水果屬天然農產品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/生鮮食品不適用七日鑑賞期.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/天然果皮紋路[、，]?小瑕疵屬正常生長現象.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/天然外觀差異[、，]?口感[、，]?甜度等因素恕不列入退換貨範圍.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/若收到商品有嚴重碰傷或腐敗.*/g, "");
+
+                    // 💡 餐具/陶瓷玻璃/生活用品警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或清洗後[，,]?恕無法辦理退換貨[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色及紋理可能因製程[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*陶瓷[、，]?玻璃製品可能有微小氣泡[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請立即檢查[，,]?如有破裂[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品經清洗[、，]?使用或拆除保護包裝後[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請避免碰撞[、，]?摔落及劇烈溫差[^\n]*/g, "");
+
+                    // 💡 美妝/清潔用品警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?香氣及濃稠度[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*香味[、，]?清潔感及使用感受[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用前請詳閱商品標示[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依產品用途正確使用[，,]?因保存不當[^\n]*/g, "");
+
+                    // 💡 烘焙食品與重量相關警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*烘焙食品[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*重量略有差異[，,]?請依包裝標示為準[^\n]*/g, "");
+
+                    // 💡 冷凍與冰品相關警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[、，]?(?:結霜|出水)?[、，]?屬正常現象請安心[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
+
+                    // 💡 🐾 寵物食品警語清理
+                    cleanBodyText = cleanBodyText.replace(/🐾\s*寵物食品[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認成分及適用對象[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*每隻毛孩適口性及接受度不同[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*開封後請依包裝標示妥善保存[，,]?因保存不當造成變質[^\n]*/g, "");
+
+                    // 💡 電器/電池相關警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認插座規格[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用時請勿超過商品標示之額定功率[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依產品說明正確使用[，,]?因拉扯[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品經插電使用後[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認電池型號[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依正負極及使用說明安裝[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*電池續航會因設備[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*電池屬消耗品[^\n]*/g, "");
+
+                    // 💡 星星與⚠️特別警語清理（超級寬鬆全比對，覆蓋所有變化語句）
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或拆封後[，,]?恕無法辦理退換貨[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品些微裂痕[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量魚鱗[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*原裝箱可能含有[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*真空輕微失真空[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*輕微擠壓凹損[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*首次使用建議局部測試[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量冰晶[、，]?出水或碎裂[^\n]*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*到貨時間可能因氣候[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*不同材質黏合效果[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品外觀[^\n]*?(?:實際到貨|到貨).*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝外觀[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*外包裝微[磨凹][^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*肉品油花[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*易碎食品[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*如果上面有浮油是正常的[、，]?攪拌後即可食用[！!]?.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量分層[、，]?出水或沉澱[，,]?屬正常現象請安心.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*天然食材風味略有不同[，,]?展現食材特色.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*重量[、，]?尺寸略有差異[，,]?請依包裝標示為準.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*手工烘焙商品[，,]?每批外觀皆有些許不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*退冰後些微裂痕或變形[，,]?屬正常現象.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用前請詳閱說明[，,]?依指示操作[，,]?避免自行拆修.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*續航[、，]?耗電與效果[，,]?會因使用環境而略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*若有非人為瑕疵[，,]?請於期限內聯繫[，,]?我們將協助處理.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品拆封使用後[，,]?非瑕疵因素恕無法辦理退換貨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?花紋略有差異[，,]?請以實際到貨為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*保健食品非藥品[，,]?請依建議食用並均衡飲食.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食用感受因人而異[，,]?請以自身體驗為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品拆封或食用後[，,]?除瑕疵外恕無法退換.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*孕婦[、，]?用藥或特殊體質者[，,]?食用前請先諮詢專業人士.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用後[，,]?恕無法辦理退換貨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*外盒輕微擠壓凹損[，,]?不影響品質與正常使用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝輕微擠壓凹損[，,]?不影響品質與正常使用.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*影片圖片僅供使用參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品如有瑕疵請於規定期限內辦理退換貨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品請確認尺寸後再下訂.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品因拍攝光線[、，]?螢幕顯示及生產批次不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依標示妥善保存[，,]?維持最佳新鮮風味.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品請依建議保存[，,]?開封後盡快享用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色略有差異[，,]?請以實際到貨為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*尺寸為人工測量[，,]?請先確認尺寸再安心下單.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*線頭[、，]?摺痕或些微氣味[，,]?屬新品正常現象.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*深色衣物首次清洗[，,]?建議單獨洗滌更安心.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用時請保持通風[，,]?請勿與其他清潔劑混合使用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*若不慎接觸眼睛或不適[，,]?請沖水並盡速就醫.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*特殊材質請先小範圍測試[，,]?確認後再安心使用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*頑垢可能需多次清潔[，,]?效果依髒污程度而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*敏感肌或長時間使用[，,]?建議配戴手套更安心.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*如有不適請停止使用[，,]?並以清水沖洗後就醫.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品拆封或使用後[，,]?除瑕疵外恕無法退換.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品介紹供參考[，,]?實際使用感受因人而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色略有差異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請先檢查.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用[、，]?組裝或清洗後.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*使用感受因人而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*效期[、，]?口感與色澤.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*外包裝微凹陷磨損.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食品口味因人而異.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*退冰出水或重量微差.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*料理食用時[，,]?請留意少量細骨.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*天然海鮮個體不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依標示冷藏保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*飲用前請先搖勻.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*天然原料風味略有不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請全程冷凍保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*食用前請充分加熱.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*配料比例略有不同.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*取貨請先檢查.*/g, "");
+
+                    // 💡 ⚠️ 警語清理
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*鮮奶因配送時間因素[，,]?到貨效期較短.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*請依照產品用途使用[，,]?避免直接接觸眼睛.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*初次使用建議先放置於通風環境.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*香味濃淡及留香時間會因使用環境.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*請置於幼童及寵物不易接觸處.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*因農產品受採收[、，]?天候及物流影響.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品採接單後安排生產.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*影片圖片僅供使用參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*圖片文案一樣不代表品質.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品如有瑕疵請於規定期限.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/外盒凹損或外觀輕微瑕疵.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*服飾、鞋類商品請確認尺寸.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/手工測量誤差.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品因拍攝光線、螢幕顯示.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/顏色、外觀、包裝或細節.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品圖片僅供參考.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/請以實際到貨商品為準.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品請依包裝標示方式妥善保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因離開冷藏環境過久.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*取貨時請立即確認商品及包裝狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/如有破損、退冰、變質.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/逾期、商品已烹調食用或無法提供佐證者.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*食品屬消耗性商品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/恕不因個人口味、口感、外觀、包裝.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品尺寸、顏色及外觀可能因人工測量.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品一經使用、組裝、清洗.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因個人使用、保管不當造成之損壞.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*運送過程中，外盒、包裝或瓶身如有輕微擠壓.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/不影響商品本身功能及品質者，不列入瑕疵.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品實際使用效果、穿著感受或適用性.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/不以個人主觀感受作為退換貨依據.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/不適合對相關成分過敏者食用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*商品有效期限、外觀、口感、色澤及風味.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*餅乾、糕餅、酥脆類.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/商品請全程冷凍並依外包裝標示妥善保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/因取貨逾時、保存不當或自行退冰所造成之品質變化.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/調理食品請依包裝標示方式充分加熱後食用.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/可能影響商品外觀、口感及熟度，請依實際情況調整.*/g, "");
+
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*固形物包含主食材.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*海鮮可能因季節.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冰品請全程冷凍保存.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冰品於配送過程中.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*冷凍商品退冰後可能因冰晶融化.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*優酪乳、優格、果汁及其他冷藏飲品.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/🌱\s*運送過程中如有少量落葉.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/☀️\s*植物到貨後請立即依植物特性.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/📸\s*如收到商品有嚴重折損.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/購買須知.*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/價格[:：].*/g, "");
                     cleanBodyText = cleanBodyText.replace(/款式名稱[:：].*/g, "");
@@ -340,7 +540,7 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️ 星星及通用破折號
+                        // 💡 徹底過濾任何夾帶隱形符號/空格的孤立星星列（如 ⭐、⭐️）
                         const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0]*[⭐⭐️][\s\uFE0F\u200B\u00A0]*$/.test(stripped);
                         if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
@@ -363,8 +563,8 @@
                     let baseText = cleanedLines.join("\n").trim();
 
                     // 💡 尾端⸻或全形破折號清理，確保不留下多餘分隔符號
-                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-") || baseText.endsWith("⭐") || baseText.endsWith("⭐️")) {
-                        baseText = baseText.replace(/[⸻－—-⭐⭐️]+\s*$/, "").trim();
+                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-")) {
+                        baseText = baseText.replace(/[⸻－—-]+\s*$/, "").trim();
                     }
 
                     while (baseText.includes("\n\n\n")) {
