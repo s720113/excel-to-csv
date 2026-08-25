@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0825v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0826v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0825v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[精準稱呼清理] 僅清理「梅姐」名稱，完整保留「嚴選來自高海拔甜柿」等內文介紹！</b><br>
-        2. 💡 <b>[ABC選項分隔線] 自動在 ABC 款式選項下方補上一條 ⸻ 分隔線，版面更整齊！</b><br>
+        1. 💡 <b>[孤立符號過濾] 自動清理殘留的單獨 ⭐/⭐️ 星星符號，避免排版尾端留白出現錯字！</b><br>
+        2. 💡 <b>[超強大掃除] 升級軟性比對，徹底消除「⭐️ 少量冰晶/蔬果大小形狀/商品重量顏色...」及所有變體警語！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -322,6 +322,16 @@
                     cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
                     cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
 
+                    // 💡 口罩與個人衛生用品警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?尺寸及包裝可能因批次略有差異[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*購買前請確認尺寸[、，]?規格及適用對象[，,]?配戴鬆緊[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*口罩屬個人衛生用品[，,]?拆封或使用後基於衛生考量[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依商品標示正確配戴及保存[，,]?因保存不當[^\n]*/g, "");
+
+                    // 💡 蔬果與食材警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬果大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
+
                     // 💡 升級版規格選項整行刪除（無論 A. A： A- A、 A 均自動刪除選項整行，不傷及純內容規格）
                     cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】).*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[\s]*[-－—：:.。、\s].*/gm, "");
 
@@ -362,7 +372,7 @@
 
                     // 💡 冷凍與冰品相關警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*少量冰晶[、，]?結霜或變形[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[、，]?(?:結霜|出水)?[、，]?屬正常現象請安心[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
 
                     // 💡 🐾 寵物食品警語清理
@@ -529,8 +539,8 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 包含過濾全形及半形破折號 －, —, ⸻, -
-                        if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
+                        // 包含過濾孤立符號與全形及半形破折號 －, —, ⸻, -, ⭐, ⭐️
+                        if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌', '⭐', '⭐️'].includes(stripped)) continue;
                         
                         if (abcLineRegex.test(stripped)) {
                             lastAbcIdx = cleanedLines.length;
