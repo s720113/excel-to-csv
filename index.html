@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0826v7</title>
+    <title>Excel 轉 CSV 智慧排版工具 0826v3_Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v7</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v3_Fix</h1>
     <div class="subtitle">
-        1. 💡 <b>[關鍵字模糊掃除] 升級軟性比對，「局部測試/如有不適/包裝外觀/除瑕疵外/感受因人而異」徹底自動刪除整行！</b><br>
-        2. 💡 <b>[精準規格保護] 100% 保留「規格重量 1000g」、「保存方式 -18度c」與「過敏原資訊」不被誤刪！</b><br>
+        1. 💡 <b>[回歸 V3 核心] 完美保留文章特色、重量規格與過敏原資訊，不因比對而誤刪文章！</b><br>
+        2. 💡 <b>[安全星星擦除] 自動將尾端殘留的孤立 ⭐/⭐️ 星星擦除乾淨，版面乾淨不留尾巴！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -210,18 +210,14 @@
         for (let line of lines) {
             let trimmed = line.trim();
 
-            if (trimmed.includes("【型號】") || trimmed.includes("【材質】") || trimmed.includes("【保存方式】") || trimmed.includes("度c")) continue;
+            if (trimmed.includes("【型號】") || trimmed.includes("【材質】")) continue;
 
-            // 💡 解析選項字母，排除度c/cm/ml等單位字母與 T-Sonic 型號等誤判
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
             while ((match = abcLineRegex.exec(trimmed)) !== null) {
                 let rawLetter = match[1].toUpperCase();
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
-
-                // 排除英文單字/品牌型號（例如：T-Sonic）、溫度或單位字母誤當選項
-                if (/^[A-Za-z]/.test(optionName) || trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
@@ -316,52 +312,22 @@
 
                     let cleanBodyText = postText;
 
-                    // 💡 到貨日與溫馨提醒標頭擦除
+                    // 💡 藥商執照資訊自動更換
+                    cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
+                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
+
+                    // 💡 通用性到貨日與溫馨提醒標頭清理
                     cleanBodyText = cleanBodyText.replace(/.*到貨日.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚚.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/🚗.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/溫馨提醒[:：]?.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/收到到貨通知[，,]?請盡快取貨.*/g, "");
 
-                    // 💡 關鍵字模糊比對：只要行內包含以下特徵，整行徹底清除！
-                    cleanBodyText = cleanBodyText.replace(/^.*局部測試.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*如有不適請停止使用.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*包裝外觀略有差異.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*商品外觀[^\n]*?(?:實際到貨|到貨).*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*除瑕疵外恕無法退換.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*非瑕疵因素恕無法辦理退換貨.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*商品介紹供參考.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*使用感受因人而異.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*效期[、，]?口感與色澤.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*外包裝微凹陷磨損.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*取貨請先檢查.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*食品口味因人而異.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*請全程冷凍保存.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*少量冰晶.*/gm, "");
-                    cleanBodyText = cleanBodyText.replace(/^.*蔬果大小形狀不同.*/gm, "");
-
-                    // 💡 徹底擦除孤立存在的星星字符
-                    cleanBodyText = cleanBodyText.replace(/⭐/g, "").replace(/⭐️/g, "");
-
-                    // 💡 精準清理「梅姐」稱呼，保留後續特色文案（如：嚴選來自高海拔甜柿）
-                    cleanBodyText = cleanBodyText.replace(/⏰\s*\d{1,2}[/／]\d{1,2}\s*結單[。.]?/g, "");
-                    cleanBodyText = cleanBodyText.replace(/梅姐(?:嚴選|推薦)?[\s:：]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/\d+[-－—~～]\d+\s*天到貨[。.]?/g, "");
-
-                    // 💡 藥商執照資訊自動更換
-                    cleanBodyText = cleanBodyText.replace(/【?藥商許可執照】?[:：]?\s*南市醫器販字第MD6205003016號/g, "藥商許可執照：南市醫器販字第MD62032486號");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商公司名稱】?[:：]?\s*莊敬生活百貨/g, "藥商公司名稱：鑫宏商行");
-                    cleanBodyText = cleanBodyText.replace(/【?藥商地址】?[:：]?\s*台南市東區怡東路109號1樓/g, "藥商地址：臺南市永康區國光六街2號1樓");
-
                     // 💡 大聲公與購買須知清理
                     cleanBodyText = cleanBodyText.replace(/📢\s*購買須知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/📢\s*【購買須知】.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/【購買須知】生鮮蔬果屬天然農產品.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/生鮮水果屬天然農產品.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/生鮮食品不適用七日鑑賞期.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/天然果皮紋路[、，]?小瑕疵屬正常生長現象.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/天然外觀差異[、，]?口感[、，]?甜度等因素恕不列入退換貨範圍.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/若收到商品有嚴重碰傷或腐敗.*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/價格[:：].*/g, "");
                     cleanBodyText = cleanBodyText.replace(/款式名稱[:：].*/g, "");
@@ -374,7 +340,9 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        if (!stripped || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
+                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️ 星星及通用破折號
+                        const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0]*[⭐⭐️][\s\uFE0F\u200B\u00A0]*$/.test(stripped);
+                        if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
                         if (abcLineRegex.test(stripped)) {
                             lastAbcIdx = cleanedLines.length;
@@ -395,8 +363,8 @@
                     let baseText = cleanedLines.join("\n").trim();
 
                     // 💡 尾端⸻或全形破折號清理，確保不留下多餘分隔符號
-                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-")) {
-                        baseText = baseText.replace(/[⸻－—-]+\s*$/, "").trim();
+                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-") || baseText.endsWith("⭐") || baseText.endsWith("⭐️")) {
+                        baseText = baseText.replace(/[⸻－—-⭐⭐️]+\s*$/, "").trim();
                     }
 
                     while (baseText.includes("\n\n\n")) {
