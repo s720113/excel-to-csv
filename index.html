@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0828v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0828v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v3</h1>
     <div class="subtitle">
-        1. 💡 <b>[全形數字相容] 比對價格時自動相容全形數字（如６５➔65），解決誤報金額不吻合的問題！</b><br>
-        2. 💡 <b>[精準警語清除] 新增自動清除「一次性用品妥善密封...」等生活耗材類警語！</b><br>
+        1. 💡 <b>[底端殘留星星吸塵器] 專屬處理 ⸻ 分隔線上方殘留的孤立 ⭐/⭐️，精準擦除絕不影響文章內文！</b><br>
+        2. 💡 <b>[全形數字相容] 比對價格時自動相容全形數字（如６５➔65），解決誤報金額不吻合的問題！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -381,6 +381,7 @@
                     // 💡 美妝/清潔用品警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品顏色[、，]?香氣及濃稠度[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*香味[、，]?清潔感及使用感受[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*香味及使用感受因人而異[，,]?恕不因個人喜好或主觀感受辦理退換貨[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*使用前請詳閱商品標示[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請依產品用途正確使用[，,]?因保存不當[^\n]*/g, "");
 
@@ -390,7 +391,7 @@
 
                     // 💡 冷凍與冰品相關警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[、，]?(?:結霜|出水)?[、，]?屬正常現象請安心[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
 
                     // 💡 🐾 寵物食品警語清理
@@ -410,6 +411,7 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*電池屬消耗品[^\n]*/g, "");
 
                     // 💡 星星與⚠️特別警語清理（超級寬鬆全比對，覆蓋所有變化語句）
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*效期與色澤[，,]?依每批商品略有不同[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或拆封後[，,]?恕無法辦理退換貨[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食品些微裂痕[^\n]*/g, "");
@@ -576,10 +578,8 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
-                    // 💡 尾端⸻或全形破折號清理，確保不留下多餘分隔符號
-                    while (baseText.endsWith("⸻") || baseText.endsWith("－") || baseText.endsWith("—") || baseText.endsWith("-") || baseText.endsWith("⭐") || baseText.endsWith("⭐️")) {
-                        baseText = baseText.replace(/[⸻－—-⭐⭐️]+\s*$/, "").trim();
-                    }
+                    // 💡 文章末尾專屬極速吸塵器：只在貼文最底下清理殘留的 ⭐/⭐️/⸻ 與隱形符號，絕不影響文章內文！
+                    baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0⭐⭐️⸻－—-]+$/, "").trim();
 
                     while (baseText.includes("\n\n\n")) {
                         baseText = baseText.replace(/\n\n\n/g, "\n\n");
