@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0826v3_PriceFix</title>
+    <title>Excel 轉 CSV 智慧排版工具 0828v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0826v3_PriceFix</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v1</h1>
     <div class="subtitle">
         1. 💡 <b>[全形數字相容] 比對價格時自動相容全形數字（如６５➔65），解決誤報金額不吻合的問題！</b><br>
-        2. 💡 <b>[孤立星星全面掃除] 升級 Unicode 解析，徹底消除帶有隱形符號的殘留 ⭐/⭐️ 星星！</b><br>
+        2. 💡 <b>[精準警語清除] 新增自動清除「一次性用品妥善密封...」等生活耗材類警語！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -346,6 +346,9 @@
                     // 💡 蔬果與食材警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬果大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
+
+                    // 💡 一次性用品與生活耗材警語清理
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品為一次性用品[，,]?使用後請妥善密封並依當地垃圾分類規定處理[。.]?/g, "");
 
                     // 💡 精準清理「規格選項列」，避免誤刪 ❇【規格重量】1000g 這種真實內容規格！
                     cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】)\s*[:：]?\s*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。、].*/gm, "");
