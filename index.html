@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0828v4</title>
+    <title>Excel 轉 CSV 智慧排版工具 0830v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v4</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0830v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[底端殘留星星吸塵器] 專屬處理 ⸻ 分隔線上方殘留的孤立 ⭐/⭐️，精準擦除絕不影響文章內文！</b><br>
-        2. 💡 <b>[精準警語清除] 新增清除「烘焙商品每批外觀...」、「包裝微磨損不影響...」、「商品包裝顏色略有差異...」！</b><br>
+        1. 💡 <b>[FB 貼文殘留星星強化清理] 專門過濾從 FB 複製文章時夾帶在舊款式標籤上方的孤立 ⭐/⭐️ 星星！</b><br>
+        2. 💡 <b>[精準警語清除] 保留「烘焙商品每批外觀...」、「包裝微磨損...」、「包裝顏色略有差異...」自動清理！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -520,6 +520,7 @@
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品尺寸、顏色及外觀可能因人工測量.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
@@ -561,7 +562,7 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️ 星星及通用破折號
+                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️ 星星及通用破折號（含隱形符號）
                         const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0]*[⭐⭐️][\s\uFE0F\u200B\u00A0]*$/.test(stripped);
                         if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
@@ -583,8 +584,12 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
-                    // 💡 文章末尾專屬極速吸塵器：只在貼文最底下清理殘留的 ⭐/⭐️/⸻ 與隱形符號，絕不影響文章內文！
-                    baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0⭐⭐️⸻－—-]+$/, "").trim();
+                    // 💡 FB 專用尾端多重循環吸塵器：徹底把文章最後面的 ⭐/⭐️/⸻、空白與隱形字元全部清空！
+                    let prevText = "";
+                    while (baseText !== prevText) {
+                        prevText = baseText;
+                        baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0⭐⭐️⸻－—-]+$/, "").trim();
+                    }
 
                     while (baseText.includes("\n\n\n")) {
                         baseText = baseText.replace(/\n\n\n/g, "\n\n");
