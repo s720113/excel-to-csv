@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0828v3</title>
+    <title>Excel 轉 CSV 智慧排版工具 0828v4</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v3</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0828v4</h1>
     <div class="subtitle">
         1. 💡 <b>[底端殘留星星吸塵器] 專屬處理 ⸻ 分隔線上方殘留的孤立 ⭐/⭐️，精準擦除絕不影響文章內文！</b><br>
-        2. 💡 <b>[全形數字相容] 比對價格時自動相容全形數字（如６５➔65），解決誤報金額不吻合的問題！</b><br>
+        2. 💡 <b>[精準警語清除] 新增清除「烘焙商品每批外觀...」、「包裝微磨損不影響...」、「商品包裝顏色略有差異...」！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -386,10 +386,15 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請依產品用途正確使用[，,]?因保存不當[^\n]*/g, "");
 
                     // 💡 烘焙食品與重量相關警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*烘焙商品[，,]?每批外觀皆有些許不同[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*烘焙食品[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*重量略有差異[，,]?請依包裝標示為準[^\n]*/g, "");
 
-                    // 💡 冷凍與冰品相關警語清理
+                    // 💡 包裝外觀與顏色差異警語清理
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*包裝微磨損[，,]?不影響品質可安心食用[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品包裝顏色略有差異[，,]?請以實際到貨為準[。.]?/g, "");
+
+                    // 💡 冷冷凍與冰品相關警語清理
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
