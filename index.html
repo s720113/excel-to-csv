@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0901v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0901v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,9 +99,9 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0901v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0901v3</h1>
     <div class="subtitle">
-        1. 💡 <b>[最新頁腳範本] 已更新為「📌下單請+數量、結單關閉留言、小幫手才看得到」全新文案！</b><br>
+        1. 💡 <b>[全新社團頁腳同步] 已更新包含到貨6天反應、延遲取貨告知、抓單提醒等最新條款！</b><br>
         2. 💡 <b>[FB 貼文殘留星星清理] 專門過濾從 FB 複製文章時夾帶在舊款式標籤上方的孤立 ⭐/⭐️ 星星！</b><br>
         3. <b>[全單位大補帖] 支援 組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張 等常見單位！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
@@ -122,9 +122,9 @@
 </div>
 
 <script>
-    const FOOTER_A = "\n\n⸻\n\n📌下單請+數量\n✅範例：+1、+2、+3\n✅電腦才會自動抓單哦\n🔺結單時間：公布結單日、結單關閉留言，無法「追加訂單或取消訂單」要購買的團友動作要快。\n⚠️「若要取消商品」請在結單前、在此商品貼文下\\留言/《取消訂單》👩🏼‍💻小幫手才看得到哦❗️\n⚠️切記❗️請勿自行刪留言，系統不會自動刪除更改，訂單還是存在。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n🍒商品有問題，到貨通知算起6天內盡速反應門市，若只是外觀小瑕疵、運送過程有凹盒，不影響功能不做退換處理。\n💢有事要延遲取貨，請先主動告知小幫手，棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠️預購商品需等待，急用或無法等待者勿下單哦😃\n♻️為響應環保，請自備環保購物袋🛍️";
+    const FOOTER_A = "\n\n⸻\n\n📌下單請+數量\n✅範例：+1、+2、+3\n✅電腦才會自動抓單哦\n🔺結單時間：公布結單日、結單關閉留言，無法「追加訂單或取消訂單」要購買的團友動作要快。\n⚠️「若要取消商品」請在結單前、在此商品貼文下\\留言/《取消訂單》👩🏼‍💻小幫手才看得到哦❗️\n⚠️切記❗️請勿自行刪留言，系統不會自動刪除更改，訂單還是存在。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n🍒商品有問題，到貨通知算起6天內盡速反應門市，若只是外觀小瑕疵、運送過程有凹盒，不影響功能不做退換處理。\n💢有事要延遲取貨，請先主動告知小幫手，棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠預購商品需等待，急用或無法等待者勿下單哦😃\n♻️為響應環保，請自備環保購物袋🛍️";
 
-    const FOOTER_B = "\n\n⸻\n\n‼️訂購方式：英文代碼+數量\n✅範例：A+1、B+1、C+1\n✅電腦才會自動抓單哦\n🔺結單時間：公布結單日、結單關閉留言，無法「追加訂單或取消訂單」要購買的團友動作要快。\n⚠️「若要取消商品」請在結單前、在此商品貼文下\\留言/《取消訂單》👩🏼‍💻小幫手才看得到哦❗️\n⚠️切記❗️請勿自行刪留言，系統不會自動刪除更改，訂單還是存在。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n🍒商品有問題，到貨通知算起6天內盡速反應門市，若只是外觀小瑕疵、運送過程有凹盒，不影響功能不做退換處理。\n💢有事要延遲取貨，請先主動告知小幫手，棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠️預購商品需等待，急用或無法等待者勿下單哦😃\n♻️為響應環保，請自備環保購物袋🛍️";
+    const FOOTER_B = "\n\n⸻\n\n❤️訂購方式：英文代碼+數量\n✅範例：A+1、B+1\n✅電腦才會自動抓單哦\n🔺結單時間：公布結單日、結單關閉留言，無法「追加訂單或取消訂單」要購買的團友動作要快。\n⚠️「若要取消商品」請在結單前、在此商品貼文下\\留言/《取消訂單》👩🏼‍💻小幫手才看得到哦❗️\n⚠️切記❗️請勿自行刪留言，系統不會自動刪除更改，訂單還是存在。\n👫新加入團友們：請先message開啟通知、如果不會操作請洽門市人員。\n🍒商品有問題，到貨通知算起6天內盡速反應門市，若只是外觀小瑕疵、運送過程有凹盒，不影響功能不做退換處理。\n💢有事要延遲取貨，請先主動告知小幫手，棄單者列黑名單，請團友遵守社團規定取貨🙏\n⚠預購商品需等待，急用或無法等待者勿下單哦😃\n♻️為響應環保，請自備環保購物袋🛍️";
 
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
@@ -359,7 +359,7 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或清洗後[，,]?恕無法辦理退換貨[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品尺寸[、，]?顏色及紋理可能因製程[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*陶瓷[、，]?玻璃製品可能有微小氣泡[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請先檢查[，,]?如有破裂[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*收貨請立即檢查[，,]?如有破裂[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品經清洗[、，]?使用或拆除保護包裝後[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請避免碰撞[、，]?摔落及劇烈溫差[^\n]*/g, "");
 
@@ -498,8 +498,7 @@
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請商業確認商品狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品一經使用、組裝、清洗.*/g, "");
@@ -633,9 +632,10 @@
         });
 
         const csvContent = "\uFEFF" + csvRows.join("\r\n"); 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob Somethings;
+        const blobObj = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(blobObj);
         a.download = baseFileName + ".csv";
         document.body.appendChild(a);
         a.click();
