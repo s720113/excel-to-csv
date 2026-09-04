@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0902v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0904v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,7 +99,7 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0902v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0904v1</h1>
     <div class="subtitle">
         1. 💡 <b>[單位擴充] 新增「箱」單位支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/箱）！</b><br>
         2. 💡 <b>[全新社團頁腳] 同步 0901 最新版頁腳（到貨6天反應、延遲取貨告知、抓單提醒）！</b><br>
@@ -184,7 +184,7 @@
         let mSlash = cleanText.match(new RegExp("入\\s*[／/]\\s*([" + UNITS_CHAR_SET + "])"));
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|一件|一條|顆粒|一根|一台|一把|一捲|一卷|一本|一張|一箱|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|單件|單條|單箱|一個)(?![多吃用途用方案好])/);
+        let mBody = cleanText.match(/(一組|一隻|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|一件|一條|顆粒|一根|一台|一把|一捲|一卷|一本|一張|一箱|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|單件|單條|單箱|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
