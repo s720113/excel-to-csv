@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0904v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0909v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0904v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0909v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[單位擴充] 新增「箱」單位支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/箱）！</b><br>
-        2. 💡 <b>[全新社團頁腳] 同步 0901 最新版頁腳（到貨6天反應、延遲取貨告知、抓單提醒）！</b><br>
-        3. <b>[FB 貼文殘留星星清理] 專門過濾從 FB 複製文章時夾帶在舊款式標籤上方的孤立 ⭐/⭐️ 星星！</b><br>
+        1. 💡 <b>[精準警語清除] 新增清除封口機、施工清理、螺絲工具規格、天然水晶與天然原料批次差異等警語！</b><br>
+        2. 💡 <b>[黃色星星徹底掃除] 升級末尾防護，全方位清除帶有全形空格/特殊 Unicode 碼的孤立 ⭐/⭐️/🌟 星星！</b><br>
+        3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,8 +149,7 @@
         }
     });
 
-    // 💡 擴充單位清單：新增「箱」
-    const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙片桶盞件條顆粒根台把捲卷本張箱";
+    const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙片桶盞件條顆粒根台把捲卷本張隻箱";
 
     function fullWidthToHalfWidth(str) {
         return str.replace(/[０-９]/g, function(s) {
@@ -339,6 +338,11 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品為一次性用品[，,]?使用後請妥善密封並依當地垃圾分類規定處理[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*不同材質及厚度的包裝袋[，,]?封口效果可能有所不同[，,]?建議先以較低檔位測試後再調整[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*施工前請先將表面灰塵[、，]?油污及水分清理乾淨[，,]?並先於不明顯處測試[；;]?實際乾燥時間及使用效果依施工厚度[、，]?材質與環境而異[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*實際適用範圍依螺絲規格為準[，,]?使用前請選擇相符批頭[，,]?避免造成螺絲或工具損傷[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*天然水晶每批色澤[、，]?形狀[、，]?大小及紋理可能略有不同[，,]?實際依到貨商品為準[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*商品圖片僅供參考[，,]?天然原料可能因批次不同[，,]?於顏色[、，]?大小[、，]?形狀及氣味略有差異[。.]?/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/^.*(?:規格|【規格】)\s*[:：]?\s*(?:[A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。、].*/gm, "");
 
@@ -378,7 +382,7 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品包裝顏色略有差異[，,]?請以實際到貨為準[。.]?/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/🐾\s*寵物食品[^\n]*/g, "");
@@ -397,7 +401,7 @@
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*效期與色澤[，,]?依每批商品略有不同[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或拆封後[，,]?恕無法辦理退換貨[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食品些微裂痕[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*少量魚鱗[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*原裝箱可能含有[^\n]*/g, "");
@@ -540,7 +544,8 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0]*[⭐⭐️][\s\uFE0F\u200B\u00A0]*$/.test(stripped);
+                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️/🌟 星星（包含全形與半形隱形空格）
+                        const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0\u3000]*[⭐⭐️🌟][\s\uFE0F\u200B\u00A0\u3000]*$/.test(stripped);
                         if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
                         if (abcLineRegex.test(stripped)) {
@@ -560,10 +565,11 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
+                    // 💡 尾端多重吸塵器：擴充含全形空白 \u3000 與黃色星星 \u2B50 等符號
                     let prevText = "";
                     while (baseText !== prevText) {
                         prevText = baseText;
-                        baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0⭐⭐️⸻－—-]+$/, "").trim();
+                        baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0\u3000⭐⭐️🌟⸻－—-]+$/, "").trim();
                     }
 
                     while (baseText.includes("\n\n\n")) {
