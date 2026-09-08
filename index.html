@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0909v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 0909v3</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0909v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0909v3</h1>
     <div class="subtitle">
-        1. 💡 <b>[精準警語清除] 新增清除封口機、施工清理、螺絲工具規格、天然水晶與天然原料批次差異等警語！</b><br>
-        2. 💡 <b>[黃色星星徹底掃除] 升級末尾防護，全方位清除帶有全形空格/特殊 Unicode 碼的孤立 ⭐/⭐️/🌟 星星！</b><br>
+        1. 💡 <b>[孤立星星無死角掃除] 全面支援 BOM 碼/隱形控制碼與各種款式星星（⭐/⭐️/🌟/✨/★/☆）自動擦除！</b><br>
+        2. 💡 <b>[精準警語清除] 新增清除封口機、施工清理、螺絲工具規格、天然水晶與天然原料批次差異等警語！</b><br>
         3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -382,7 +382,7 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品包裝顏色略有差異[，,]?請以實際到貨為準[。.]?/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*收到後請立即冷凍[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟✨★☆]\s*少量冰晶[^\n]*?屬正常現象請安心[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*冰品請全程冷凍[^\n]*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/🐾\s*寵物食品[^\n]*/g, "");
@@ -401,7 +401,7 @@
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*效期與色澤[，,]?依每批商品略有不同[。.]?/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品使用或拆封後[，,]?恕無法辦理退換貨[^\n]*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/[⭐️⭐🌟✨★☆]\s*外包裝微[擠凹][壓損]?[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*食品些微裂痕[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*少量魚鱗[^\n]*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*原裝箱可能含有[^\n]*/g, "");
@@ -503,6 +503,7 @@
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
@@ -544,8 +545,8 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 💡 安全抹除獨自成行的 ⭐ 與 ⭐️/🌟 星星（包含全形與半形隱形空格）
-                        const isIsolatedStar = /^[\s\uFE0F\u200B\u00A0\u3000]*[⭐⭐️🌟][\s\uFE0F\u200B\u00A0\u3000]*$/.test(stripped);
+                        // 💡 擴充比對包含 BOM 碼與全型/半型空白的孤立星星（⭐/⭐️/🌟/✨/★/☆）
+                        const isIsolatedStar = /^[\s\uFE0F\uFEFF\u200B\u00A0\u3000]*[⭐⭐️🌟✨★☆][\s\uFE0F\uFEFF\u200B\u00A0\u3000]*$/.test(stripped);
                         if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
                         if (abcLineRegex.test(stripped)) {
@@ -565,11 +566,11 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
-                    // 💡 尾端多重吸塵器：擴充含全形空白 \u3000 與黃色星星 \u2B50 等符號
+                    // 💡 末尾多重吸塵器：擴充含 \uFEFF、全形空白 \u3000 與各種星星符號
                     let prevText = "";
                     while (baseText !== prevText) {
                         prevText = baseText;
-                        baseText = baseText.replace(/[\s\uFE0F\u200B\u00A0\u3000⭐⭐️🌟⸻－—-]+$/, "").trim();
+                        baseText = baseText.replace(/[\s\uFE0F\uFEFF\u200B\u00A0\u3000⭐⭐️🌟✨★☆⸻－—-]+$/, "").trim();
                     }
 
                     while (baseText.includes("\n\n\n")) {
