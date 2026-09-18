@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0909v3</title>
+    <title>Excel 轉 CSV 智慧排版工具 0904v4</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0909v3</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0904v4</h1>
     <div class="subtitle">
-        1. 💡 <b>[孤立星星無死角掃除] 全面支援 BOM 碼/隱形控制碼與各種款式星星（⭐/⭐️/🌟/✨/★/☆）自動擦除！</b><br>
-        2. 💡 <b>[精準警語清除] 新增清除封口機、施工清理、螺絲工具規格、天然水晶與天然原料批次差異等警語！</b><br>
+        1. 💡 <b>[食品字号防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，不再把字號誤當作 ABC 款式！</b><br>
+        2. 💡 <b>[孤立星星無死角掃除] 全面支援 BOM 碼/隱形控制碼與各種款式星星（⭐/⭐️/🌟/✨/★/☆）自動擦除！</b><br>
         3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -200,7 +200,7 @@
                     break;
                 }
             }
-            if (!hasUnit && !val.includes("一個")) {
+            if (!hasUnit && !val.includes("一個") && !val.includes("183128073")) {
                 return val;
             }
         }
@@ -216,7 +216,14 @@
         for (let line of lines) {
             let trimmed = line.trim();
 
-            if (trimmed.includes("【型號】") || trimmed.includes("【材質】") || trimmed.includes("【保存方式】") || trimmed.includes("度c")) continue;
+            // 💡 排除字號、醫療許可、型號、材質等非款式資訊列
+            if (trimmed.includes("【型號】") || 
+                trimmed.includes("【材質】") || 
+                trimmed.includes("【保存方式】") || 
+                trimmed.includes("登錄字號") || 
+                trimmed.includes("責任險") || 
+                trimmed.includes("字號") || 
+                trimmed.includes("度c")) continue;
 
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
             let match;
@@ -225,7 +232,8 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                if (trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
+                // 💡 排除數字與破折號為主的字號（如 154625729-00000-2）或度c單位
+                if (/^[\d\-－—\s]+$/.test(optionName) || trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
@@ -545,7 +553,6 @@
 
                     for (let i = 0; i < lines.length; i++) {
                         const stripped = lines[i].trim();
-                        // 💡 擴充比對包含 BOM 碼與全型/半型空白的孤立星星（⭐/⭐️/🌟/✨/★/☆）
                         const isIsolatedStar = /^[\s\uFE0F\uFEFF\u200B\u00A0\u3000]*[⭐⭐️🌟✨★☆][\s\uFE0F\uFEFF\u200B\u00A0\u3000]*$/.test(stripped);
                         if (!stripped || isIsolatedStar || ['⚠️', '—', '-', '⸻', '－', '📢', '📌'].includes(stripped)) continue;
                         
@@ -566,7 +573,6 @@
 
                     let baseText = cleanedLines.join("\n").trim();
 
-                    // 💡 末尾多重吸塵器：擴充含 \uFEFF、全形空白 \u3000 與各種星星符號
                     let prevText = "";
                     while (baseText !== prevText) {
                         prevText = baseText;
