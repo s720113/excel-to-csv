@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0918v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0919v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,11 +99,11 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0918v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0919v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[食品字号防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，不再把字號誤當作 ABC 款式！</b><br>
-        2. 💡 <b>[孤立星星無死角掃除] 全面支援 BOM 碼/隱形控制碼與各種款式星星（⭐/⭐️/🌟/✨/★/☆）自動擦除！</b><br>
-        3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
+        1. 💡 <b>[補齊一對單位] 完整支援「一對 / 單對」，擴充款式單位辨識庫！</b><br>
+        2. 💡 <b>[食品字號防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，不再把字號誤當作 ABC 款式！</b><br>
+        3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/對/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
 
@@ -149,7 +149,7 @@
         }
     });
 
-    const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙片桶盞件條顆粒根台把捲卷本張隻箱";
+    const UNITS_CHAR_SET = "組包罐瓶盒支袋個雙對片桶盞件條顆粒根台把捲卷本張隻箱";
 
     function fullWidthToHalfWidth(str) {
         return str.replace(/[０-９]/g, function(s) {
@@ -183,7 +183,7 @@
         let mSlash = cleanText.match(new RegExp("入\\s*[／/]\\s*([" + UNITS_CHAR_SET + "])"));
         if (mSlash) return "一" + mSlash[1];
 
-        let mBody = cleanText.match(/(一組|一隻|一包|一罐|一瓶|一盒|一支|一袋|一雙|一片|一桶|一盞|一件|一條|顆粒|一根|一台|一把|一捲|一卷|一本|一張|一箱|單包|單瓶|單罐|單組|單雙|單片|單桶|單盞|單件|單條|單箱|一個)(?![多吃用途用方案好])/);
+        let mBody = cleanText.match(/(一組|一隻|一包|一罐|一瓶|一盒|一支|一袋|一雙|一對|一片|一桶|一盞|一件|一條|顆粒|一根|一台|一把|一捲|一卷|一本|一張|一箱|單包|單瓶|單罐|單組|單雙|單對|單片|單桶|單盞|單件|單條|單箱|一個)(?![多吃用途用方案好])/);
         if (mBody) return mBody[1].replace("單", "一");
 
         return "一組";
@@ -200,7 +200,7 @@
                     break;
                 }
             }
-            if (!hasUnit && !val.includes("一個") && !val.includes("183128073")) {
+            if (!hasUnit && !val.includes("一個") && !val.includes("183128073") && !val.includes("154625729")) {
                 return val;
             }
         }
@@ -216,7 +216,6 @@
         for (let line of lines) {
             let trimmed = line.trim();
 
-            // 💡 排除字號、醫療許可、型號、材質等非款式資訊列
             if (trimmed.includes("【型號】") || 
                 trimmed.includes("【材質】") || 
                 trimmed.includes("【保存方式】") || 
@@ -232,7 +231,6 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                // 💡 排除數字與破折號為主的字號（如 154625729-00000-2）或度c單位
                 if (/^[\d\-－—\s]+$/.test(optionName) || trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
