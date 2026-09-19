@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0920v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0920v2</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,9 +99,9 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0920v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0920v2</h1>
     <div class="subtitle">
-        1. 💡 <b>[品牌簡稱防誤抓] 排除「Y.G嚴選推薦」等縮寫與文案句子，不再把品牌/推薦標語誤當作 ABC 款式！</b><br>
+        1. 💡 <b>[品牌標語完美防錯] 徹底過濾「Y.G嚴選推薦」等縮寫標語，不再誤抓為款式！</b><br>
         2. 💡 <b>[食品字號防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，保護款式不被干擾！</b><br>
         3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/對/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
@@ -200,7 +200,22 @@
                     break;
                 }
             }
-            if (!hasUnit && !val.includes("一個") && !val.includes("183128073") && !val.includes("154625729") && !val.includes("Y：G嚴選")) {
+
+            // 💡 全面排除過濾非特價選項的品牌與標語
+            const isInvalidStyle = val.includes("一個") || 
+                                   val.includes("183128073") || 
+                                   val.includes("154625729") || 
+                                   val.includes("Y.G") || 
+                                   val.includes("Y：G") || 
+                                   val.includes("Y.G嚴選") || 
+                                   val.includes("Y：G嚴選") || 
+                                   val.includes("嚴選") || 
+                                   val.includes("推薦") || 
+                                   val.includes("精彩") || 
+                                   val.includes("！") || 
+                                   val.includes("!");
+
+            if (!hasUnit && !isInvalidStyle) {
                 return val;
             }
         }
@@ -224,6 +239,8 @@
                 trimmed.includes("字號") || 
                 trimmed.includes("嚴選") || 
                 trimmed.includes("推薦") || 
+                trimmed.includes("Y.G") || 
+                trimmed.includes("Y：G") || 
                 trimmed.includes("度c")) continue;
 
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
@@ -519,7 +536,7 @@
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
-                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請立即確認商品狀況.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請商業確認商品狀況.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/如有瑕疵、缺件，請於規定期限內提供完整開箱影片.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/逾期或無法提供者，恕無法受理.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品一經使用、組裝、清洗.*/g, "");
@@ -598,7 +615,7 @@
                     }
                     
                     let priceLine = originalPriceStr ? "價格：" + originalPriceStr : "價格：";
-                    styleAndPriceSection += "\n\n" + priceLine;
+                    styleAndPriceSection += "\n\n" + price_line;
 
                     const footerTemplate = abcOptionsList ? FOOTER_B : FOOTER_A;
                     
