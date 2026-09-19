@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0919v1</title>
+    <title>Excel 轉 CSV 智慧排版工具 0920v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0919v1</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 0920v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[補齊一對單位] 完整支援「一對 / 單對」，擴充款式單位辨識庫！</b><br>
-        2. 💡 <b>[食品字號防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，不再把字號誤當作 ABC 款式！</b><br>
+        1. 💡 <b>[品牌簡稱防誤抓] 排除「Y.G嚴選推薦」等縮寫與文案句子，不再把品牌/推薦標語誤當作 ABC 款式！</b><br>
+        2. 💡 <b>[食品字號防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，保護款式不被干擾！</b><br>
         3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/對/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -200,7 +200,7 @@
                     break;
                 }
             }
-            if (!hasUnit && !val.includes("一個") && !val.includes("183128073") && !val.includes("154625729")) {
+            if (!hasUnit && !val.includes("一個") && !val.includes("183128073") && !val.includes("154625729") && !val.includes("Y：G嚴選")) {
                 return val;
             }
         }
@@ -222,6 +222,8 @@
                 trimmed.includes("登錄字號") || 
                 trimmed.includes("責任險") || 
                 trimmed.includes("字號") || 
+                trimmed.includes("嚴選") || 
+                trimmed.includes("推薦") || 
                 trimmed.includes("度c")) continue;
 
             const abcLineRegex = /(?:^|[\s,，;；])([A-Za-z]|[Ａ-Ｚａ-ｚ])[-－—：:.。][\s]*([^\$\n💰]+)/g;
@@ -231,7 +233,14 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                if (/^[\d\-－—\s]+$/.test(optionName) || trimmed.includes("度c") || trimmed.includes("℃") || optionName.startsWith("c，")) continue;
+                // 💡 排除英文縮寫 (如 Y.G)、驚嘆號標語、純數字字號等
+                if (/^[\d\-－—\s]+$/.test(optionName) || 
+                    optionName.startsWith("G") || 
+                    optionName.includes("！") || 
+                    optionName.includes("!") || 
+                    trimmed.includes("度c") || 
+                    trimmed.includes("℃") || 
+                    optionName.startsWith("c，")) continue;
 
                 optionName = optionName.replace(new RegExp("(一[" + UNITS_CHAR_SET + "]|單[" + UNITS_CHAR_SET + "]|特價|團購價|優惠價|\\$|💰).*"), '').trim();
 
