@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 轉 CSV 智慧排版工具 0920v2</title>
+    <title>Excel 轉 CSV 智慧排版工具 1009v1</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -99,10 +99,10 @@
 <body>
 
 <div class="container">
-    <h1>📝 Excel 轉 CSV 智慧排版工具 0920v2</h1>
+    <h1>📝 Excel 轉 CSV 智慧排版工具 1009v1</h1>
     <div class="subtitle">
-        1. 💡 <b>[字數與標點過濾機制] 自動過濾長句子、驚嘆號標語及【】符號，徹底解決 Y.G 嚴選與字號誤抓問題！</b><br>
-        2. 💡 <b>[食品字號防誤抓] 排除「食品業者登錄字號 E-183...」等英數編號，保護款式不被干擾！</b><br>
+        1. 💡 <b>[新增過濾] 已新增自動移除「蔬菜大小形狀不同...」與「請依標示冷凍保存...」！</b><br>
+        2. 💡 <b>[字數與標點過濾機制] 自動過濾長句子、驚嘆號標語及【】符號，徹底解決 Y.G 嚴選與字號誤抓問題！</b><br>
         3. <b>[單位擴充] 支援（組/包/罐/瓶/盒/支/袋/個/雙/對/片/桶/盞/件/條/顆/粒/根/台/把/捲/卷/本/張/隻/箱）！</b><br>
         4. <b>[一鍵雙下載] 放入 Excel 後，自動同時下載「跟團中.csv」和前後保留空白的「跟團中_純貼文版.txt」！</b>
     </div>
@@ -233,7 +233,6 @@
                 let cleanLetter = fullToHalfLetter[rawLetter] ? fullToHalfLetter[rawLetter] : rawLetter;
                 let optionName = match[2].trim();
 
-                // 💡 強力防誤抓關鍵：排除含有長句子、驚嘆號、特別符號【】或長度大於 20 字的文案
                 if (/^[\d\-－—\s]+$/.test(optionName) || 
                     optionName.length > 20 ||
                     optionName.includes("【") || 
@@ -353,6 +352,9 @@
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*請依商品標示正確配戴及保存[，,]?因保存不當[^\n]*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬果大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*蔬菜大小形狀不同[，,]?展現天然食材特色[^\n]*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⭐️\s*請依標示冷凍保存[，,]?開封後請盡快享用[^\n]*/g, "");
+
                     cleanBodyText = cleanBodyText.replace(/⭐️\s*商品重量[、，]?顏色略有差異[，,]?請以實際到貨為準[^\n]*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*本商品為一次性用品[，,]?使用後請妥善密封並依當地垃圾分類規定處理[。.]?/g, "");
@@ -518,6 +520,7 @@
                     cleanBodyText = cleanBodyText.replace(/恕不因個人口味、口感、外觀、包裝.*/g, "");
 
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*商品尺寸、顏色及外觀可能因人工測量.*/g, "");
+                    cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
                     cleanBodyText = cleanBodyText.replace(/⚠️\s*收到商品後請開啟通知.*/g, "");
